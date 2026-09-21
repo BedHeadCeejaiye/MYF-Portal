@@ -71,7 +71,7 @@ if admin_password:
     if admin_password == st.secrets["ADMIN_PASSWORD"]:
         st.sidebar.success("Correct Password!")
         st.write("---")
-        st.subheader("Saved Members List (Live Cloud Data Feed)")
+        st.subheader("Saved Members List")
 
         try:
             raw_url = st.secrets["connections"]["gsheets"]["spreadsheet"]
