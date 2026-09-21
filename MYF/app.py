@@ -60,7 +60,7 @@ with st.form("registration_form", clear_on_submit=True):
         if full_name.strip() == "":
             st.error("Full Name is a required field!")
         else:
-            st.success(f"Successfully validated details for {full_name}! Please contact your administrator to ensure data sync finishes.")
+            st.success(f"Successfully validated details for {full_name}!")
 
 # Sidebar Authentication Controls
 st.sidebar.title("🔐 Admin ")
