@@ -1,5 +1,7 @@
 import streamlit as st
 import pandas as pd
+import json
+import urllib.request
 from datetime import datetime, date
 
 # Web Page Configuration
@@ -30,13 +32,62 @@ st.title("Welcome to our Youth Fellowship Portal!")
 st.write("We are glad you are here! Please take a moment to fill out the form below so we can stay connected.")
 st.write("---")
 
-# Embedded Google Form Section
 st.subheader("✝️ New Registration Form")
-st.write("Please fill out this official form. Your details will automatically sync to our church database.")
+with st.form("registration_form", clear_on_submit=True):
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        full_name = st.text_input("Full Name:", placeholder="e.g., John Doe")
+        birthday = st.date_input(
+            "Birthday:", 
+            value=date(2000, 1, 1), 
+            min_value=date(1900, 1, 1), 
+            max_value=date.today(), 
+            format="MM/DD/YYYY"
+        )
+        gender = st.selectbox("Gender:", ["Male", "Female", "Other"])
+        membership_status = st.selectbox("Membership Status:", ["Active Member", "First-Time Visitor"])
+        church = st.text_input("Church:", placeholder="e.g., Taytay Methodist Church")
 
-google_form_embed_url = 'https://docs.google.com/forms/d/e/1FAIpQLSecvbTyNjP57X1fhFX3EQ_6gmPDW7DzosCF-y0i2g7IBCEn0Q/viewform?embedded=true'
+    with col2:
+        parent_name = st.text_input("Parent's / Guardian's Name:", placeholder="e.g., Mary Doe")
+        fb_profile = st.text_input("Facebook Profile Link or Name:", placeholder="e.g., ://facebook.com")
+        contact_number = st.text_input("Contact Number:", placeholder="e.g., 09123456789")
+        address = st.text_area("Complete Address:", height=100, placeholder="e.g., 123 Street Name, Barangay, City")
 
-st.components.v1.iframe(google_form_embed_url, height=800, scrolling=True)
+    submit_button = st.form_submit_button("Save Registration Details")
+
+    if submit_button:
+        if full_name.strip() == "":
+            st.error("Full Name is a required field!")
+        else:
+            bday_str = birthday.strftime("%m/%d/%Y") if birthday else ""
+            current_now = datetime.now().strftime("%m/%d/%Y %H:%M:%S")
+            
+            payload = {
+                "fullName": full_name,
+                "birthday": bday_str,
+                "gender": gender,
+                "status": membership_status,
+                "church": church,
+                "parentName": parent_name,
+                "fbProfile": fb_profile,
+                "contactNumber": contact_number,
+                "address": address,
+                "registrationDate": current_now
+            }
+
+            try:
+                script_url = st.secrets["SCRIPT_URL"]
+                req = urllib.request.Request(
+                    script_url, 
+                    data=json.dumps(payload).encode("utf-8"), 
+                    headers={"Content-Type": "application/json"}
+                )
+                urllib.request.urlopen(req)
+                st.success(f"Successfully registered {full_name} directly to the Cloud database!")
+            except Exception as e:
+                st.error("Details verified locally, but the online database link is pending setup.")
 
 st.write("---")
 
@@ -66,10 +117,8 @@ if admin_password:
             with search_col:
                 search_query = st.text_input("Search list by name:", value="")
                 
-            if search_query:
-                name_col = [col for col in df_clean.columns if "name" in col.lower()]
-                target_col = name_col[0] if name_col else df_clean.columns[0]
-                df_clean = df_clean[df_clean[target_col].astype(str).str.contains(search_query, case=False, na=False)]
+            if search_query and "Full Name" in df_clean.columns:
+                df_clean = df_clean[df_clean['Full Name'].astype(str).str.contains(search_query, case=False, na=False)]
             
             st.dataframe(df_clean, use_container_width=True)
             
@@ -81,6 +130,6 @@ if admin_password:
                 mime="text/csv"
             )
         else:
-            st.info("The storage sheet list is currently empty or loading database records.")
+            st.info("The database is currently loading or empty.")
     else:
         st.sidebar.error("Wrong Password")
