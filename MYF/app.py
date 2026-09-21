@@ -36,7 +36,6 @@ st.write("Please fill out this official form. Your details will automatically sy
 
 google_form_embed_url = "<iframe src="https://docs.google.com/forms/d/e/1FAIpQLSecvbTyNjP57X1fhFX3EQ_6gmPDW7DzosCF-y0i2g7IBCEn0Q/viewform?embedded=true" width="640" height="1716" frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>"
 
-# Embeds the form smoothly right inside the page so users don't leave your site
 st.components.v1.iframe(google_form_embed_url, height=800, scrolling=True)
 
 st.write("---")
@@ -52,7 +51,6 @@ if admin_password:
         st.write("---")
         st.subheader("Saved Members List (Live Cloud Data Feed)")
 
-        # Stream data directly from the configured URL
         try:
             raw_url = st.secrets["connections"]["gsheets"]["spreadsheet"]
             csv_url = get_clean_url(raw_url)
@@ -68,7 +66,6 @@ if admin_password:
             with search_col:
                 search_query = st.text_input("Search list by name:", value="")
                 
-            # Flexible query tool to find target search columns dynamically
             if search_query:
                 name_col = [col for col in df_clean.columns if "name" in col.lower()]
                 target_col = name_col[0] if name_col else df_clean.columns[0]
