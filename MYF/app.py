@@ -30,37 +30,16 @@ st.title("Welcome to our Youth Fellowship Portal!")
 st.write("We are glad you are here! Please take a moment to fill out the form below so we can stay connected.")
 st.write("---")
 
-# Registration Form Layout
+# Embedded Google Form Section
 st.subheader("✝️ New Registration Form")
-with st.form("registration_form", clear_on_submit=True):
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        full_name = st.text_input("Full Name:", placeholder="e.g., John Doe")
-        birthday = st.date_input(
-            "Birthday:", 
-            value=date(2000, 1, 1), 
-            min_value=date(1900, 1, 1), 
-            max_value=date.today(), 
-            format="MM/DD/YYYY"
-        )
-        gender = st.selectbox("Gender:", ["Male", "Female", "Other"])
-        membership_status = st.selectbox("Membership Status:", ["Active Member", "First-Time Visitor"])
-        church = st.text_input("Church:", placeholder="e.g., Taytay Methodist Church")
+st.write("Please fill out this official form. Your details will automatically sync to our church database.")
 
-    with col2:
-        parent_name = st.text_input("Parent's / Guardian's Name:", placeholder="e.g., Mary Doe")
-        fb_profile = st.text_input("Facebook Profile Link or Name:", placeholder="e.g., ://facebook.com")
-        contact_number = st.text_input("Contact Number:", placeholder="e.g., 09123456789")
-        address = st.text_area("Complete Address:", height=100, placeholder="e.g., 123 Street Name, Barangay, City")
+google_form_embed_url = "<iframe src="https://docs.google.com/forms/d/e/1FAIpQLSecvbTyNjP57X1fhFX3EQ_6gmPDW7DzosCF-y0i2g7IBCEn0Q/viewform?embedded=true" width="640" height="1716" frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>"
 
-    submit_button = st.form_submit_button("Save Registration Details")
+# Embeds the form smoothly right inside the page so users don't leave your site
+st.components.v1.iframe(google_form_embed_url, height=800, scrolling=True)
 
-    if submit_button:
-        if full_name.strip() == "":
-            st.error("Full Name is a required field!")
-        else:
-            st.success(f"Successfully validated details for {full_name}!")
+st.write("---")
 
 # Sidebar Authentication Controls
 st.sidebar.title("🔐 Admin ")
@@ -71,8 +50,9 @@ if admin_password:
     if admin_password == st.secrets["ADMIN_PASSWORD"]:
         st.sidebar.success("Correct Password!")
         st.write("---")
-        st.subheader("Saved Members List")
+        st.subheader("Saved Members List (Live Cloud Data Feed)")
 
+        # Stream data directly from the configured URL
         try:
             raw_url = st.secrets["connections"]["gsheets"]["spreadsheet"]
             csv_url = get_clean_url(raw_url)
@@ -88,8 +68,11 @@ if admin_password:
             with search_col:
                 search_query = st.text_input("Search list by name:", value="")
                 
-            if search_query and "Full Name" in df_clean.columns:
-                df_clean = df_clean[df_clean['Full Name'].str.contains(search_query, case=False, na=False)]
+            # Flexible query tool to find target search columns dynamically
+            if search_query:
+                name_col = [col for col in df_clean.columns if "name" in col.lower()]
+                target_col = name_col[0] if name_col else df_clean.columns[0]
+                df_clean = df_clean[df_clean[target_col].astype(str).str.contains(search_query, case=False, na=False)]
             
             st.dataframe(df_clean, use_container_width=True)
             
