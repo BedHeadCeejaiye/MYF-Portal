@@ -34,7 +34,7 @@ st.write("---")
 st.subheader("✝️ New Registration Form")
 st.write("Please fill out this official form. Your details will automatically sync to our church database.")
 
-google_form_embed_url = "<iframe src="https://docs.google.com/forms/d/e/1FAIpQLSecvbTyNjP57X1fhFX3EQ_6gmPDW7DzosCF-y0i2g7IBCEn0Q/viewform?embedded=true" width="640" height="1716" frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>"
+google_form_embed_url = 'google_form_embed_url = 'https://docs.google.com/forms/d/e/1FAIpQLSecvbTyNjP57X1fhFX3EQ_6gmPDW7DzosCF-y0i2g7IBCEn0Q/viewform?embedded=true'
 
 st.components.v1.iframe(google_form_embed_url, height=800, scrolling=True)
 
