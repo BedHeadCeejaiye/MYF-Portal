@@ -176,7 +176,7 @@ if admin_password:
         df_clean = df_clean[
             df_clean["Full Name"]
             .astype(str)
-            .str.contains(search_query, case=False, na=False]
+            .str.contains(search_query, case=False, na=False)
         ]
 
       df_clean["Remove"] = False
