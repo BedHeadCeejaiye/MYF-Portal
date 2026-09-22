@@ -12,9 +12,12 @@ def get_clean_url(url_string):
         return url_string.split("/edit")[0] + "/export?format=csv"
     return url_string
 
-# Initialize a counter inside session memory to force-reset the table when No is clicked
+# Initialize session state variables
 if "table_reset_counter" not in st.session_state:
     st.session_state.table_reset_counter = 0
+
+if "selected_remove_index" not in st.session_state:
+    st.session_state.selected_remove_index = None
 
 # Daily Bible Verse Setup
 verses_list = [
@@ -132,8 +135,10 @@ if admin_password:
                 
             if search_query and "Full Name" in df_clean.columns:
                 df_clean = df_clean[df_clean['Full Name'].astype(str).str.contains(search_query, case=False, na=False)]
-            
+
             df_clean["Remove"] = False
+            if st.session_state.selected_remove_index in df_clean.index:
+                df_clean.loc[st.session_state.selected_remove_index, "Remove"] = True
 
             editor_key = f"member_editor_{st.session_state.table_reset_counter}"
 
@@ -152,6 +157,15 @@ if admin_password:
                 key=editor_key
             )
             
+            changed_rows = edited_df[edited_df["Remove"] != df_clean["Remove"]]
+            if not changed_rows.empty:
+                newly_checked = edited_df[edited_df["Remove"] == True]
+                if not newly_checked.empty:
+                    st.session_state.selected_remove_index = newly_checked.index[-1]
+                else:
+                    st.session_state.selected_remove_index = None
+                st.rerun()
+
             # Deletion panel
             marked_rows = edited_df[edited_df["Remove"] == True]
             if not marked_rows.empty:
@@ -178,12 +192,14 @@ if admin_password:
                                     )
                                     urllib.request.urlopen(req)
                                     st.session_state.table_reset_counter += 1
+                                    st.session_state.selected_remove_index = None
                                     st.rerun()
                                 except Exception:
                                     st.warning("Request processed locally, database synchronization pending.")
                         with btn_col2:
                             if st.button("No", key=f"no_cloud_{idx}"):
                                 st.session_state.table_reset_counter += 1
+                                st.session_state.selected_remove_index = None
                                 st.rerun()
             
             # Excel / CSV Data File Download Exporter
