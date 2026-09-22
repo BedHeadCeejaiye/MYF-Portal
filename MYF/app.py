@@ -110,8 +110,12 @@ if admin_password:
             df_clean = pd.DataFrame()
 
         if not df_clean.empty:
+            if "Contact Number" in df_clean.columns:
+                df_clean["Contact Number"] = df_clean["Contact Number"].astype(str).str.replace(r'\.0$', '', regex=True)
+
             if 'Row No.' not in df_clean.columns:
                 df_clean.insert(0, 'Row No.', range(1, 1 + len(df_clean)))
+
             
             search_col, _ = st.columns(2)
             with search_col:
