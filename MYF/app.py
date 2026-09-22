@@ -12,6 +12,10 @@ def get_clean_url(url_string):
         return url_string.split("/edit")[0] + "/export?format=csv"
     return url_string
 
+# Initialize a counter inside session memory to force-reset the table when No is clicked
+if "table_reset_counter" not in st.session_state:
+    st.session_state.table_reset_counter = 0
+
 # Daily Bible Verse Setup
 verses_list = [
     '"The Lord is a stronghold for the oppressed, a stronghold in times of trouble." — Psalm 9:9',
@@ -131,6 +135,8 @@ if admin_password:
             
             df_clean["Remove"] = False
 
+            editor_key = f"member_editor_{st.session_state.table_reset_counter}"
+
             edited_df = st.data_editor(
                 df_clean,
                 use_container_width=False,
@@ -143,15 +149,15 @@ if admin_password:
                         default=False,
                     )
                 },
-                key="member_editor"
+                key=editor_key
             )
             
-            # Deletion Panel Handler
+            # Deletion panel
             marked_rows = edited_df[edited_df["Remove"] == True]
             if not marked_rows.empty:
                 for idx, row in marked_rows.iterrows():
                     target_name = row["Full Name"]
-                    
+
                     box_col, alignment_col = st.columns(2)
                     with box_col:
                         st.error(f"Do you really want to remove {target_name}?")
@@ -171,15 +177,13 @@ if admin_password:
                                         headers={"Content-Type": "application/json"}
                                     )
                                     urllib.request.urlopen(req)
-                                    if "member_editor" in st.session_state:
-                                        del st.session_state["member_editor"]
+                                    st.session_state.table_reset_counter += 1
                                     st.rerun()
                                 except Exception:
                                     st.warning("Request processed locally, database synchronization pending.")
                         with btn_col2:
                             if st.button("No", key=f"no_cloud_{idx}"):
-                                if "member_editor" in st.session_state:
-                                    del st.session_state["member_editor"]
+                                st.session_state.table_reset_counter += 1
                                 st.rerun()
             
             # Excel / CSV Data File Download Exporter
