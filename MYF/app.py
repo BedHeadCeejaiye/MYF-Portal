@@ -107,110 +107,114 @@ st.write("---")
 st.sidebar.title("🔐 Admin ")
 admin_password = st.sidebar.text_input("Enter Password:", type="password", key="final_sidebar_admin_password")
 
+@st.fragment
+def admin_panel():
+    st.subheader("Saved Members List (Live Cloud Data Feed)")
+
+    try:
+        raw_url = st.secrets["connections"]["gsheets"]["spreadsheet"]
+        csv_url = get_clean_url(raw_url)
+        df_clean = pd.read_csv(csv_url)
+    except Exception:
+        df_clean = pd.DataFrame()
+
+    if not df_clean.empty:
+        if "Contact Number" in df_clean.columns:
+            df_clean["Contact Number"] = df_clean["Contact Number"].astype(str).str.replace(r'\.0$', '', regex=True)
+
+        if 'Row No.' not in df_clean.columns:
+            df_clean.insert(0, 'Row No.', range(1, 1 + len(df_clean)))
+        
+        # Name Search Functionality
+        search_col, empty_space = st.columns(2)
+        with search_col:
+            search_query = st.text_input("Search list by name:", value="")
+            
+        if search_query and "Full Name" in df_clean.columns:
+            df_clean = df_clean[df_clean['Full Name'].astype(str).str.contains(search_query, case=False, na=False)]
+
+        df_clean["Remove"] = False
+        if st.session_state.selected_remove_index in df_clean.index:
+            df_clean.loc[st.session_state.selected_remove_index, "Remove"] = True
+
+        editor_key = f"member_editor_{st.session_state.table_reset_counter}"
+
+        edited_df = st.data_editor(
+            df_clean,
+            use_container_width=False,
+            disabled=[col for col in df_clean.columns if col != "Remove"],
+            column_config={
+                "Contact Number": st.column_config.TextColumn("Contact Number"),
+                "Remove": st.column_config.CheckboxColumn(
+                    "Remove",
+                    help="Check this box to prepare row for cloud deletion",
+                    default=False,
+                )
+            },
+            key=editor_key
+        )
+        
+        changed_rows = edited_df[edited_df["Remove"] != df_clean["Remove"]]
+        if not changed_rows.empty:
+            newly_checked = edited_df[edited_df["Remove"] == True]
+            if not newly_checked.empty:
+                st.session_state.selected_remove_index = newly_checked.index[-1]
+            else:
+                st.session_state.selected_remove_index = None
+            st.rerun()
+
+        # Deletion confirmation panel
+        marked_rows = edited_df[edited_df["Remove"] == True]
+        if not marked_rows.empty:
+            for idx, row in marked_rows.iterrows():
+                target_name = row["Full Name"]
+
+                box_col, alignment_col = st.columns(2)
+                with box_col:
+                    st.error(f"Do you really want to remove {target_name}?")
+                    
+                    btn_col1, btn_col2, btn_spacer = st.columns(3)
+                    with btn_col1:
+                        if st.button("Yes", key=f"yes_cloud_{idx}"):
+                            delete_payload = {
+                                "action": "delete",
+                                "fullName": target_name
+                            }
+                            try:
+                                script_url = st.secrets["SCRIPT_URL"]
+                                req = urllib.request.Request(
+                                    script_url, 
+                                    data=json.dumps(delete_payload).encode("utf-8"), 
+                                    headers={"Content-Type": "application/json"}
+                                )
+                                urllib.request.urlopen(req)
+                                st.session_state.table_reset_counter += 1
+                                st.session_state.selected_remove_index = None
+                                st.rerun()
+                            except Exception:
+                                st.warning("Request processed locally, database synchronization pending.")
+                    with btn_col2:
+                        if st.button("No", key=f"no_cloud_{idx}"):
+                            st.session_state.table_reset_counter += 1
+                            st.session_state.selected_remove_index = None
+                            st.rerun()
+        
+        # Excel / CSV Data File Download Exporter
+        csv_data = df_clean.drop(columns=["Remove"]).to_csv(index=False).encode('utf-8')
+        st.download_button(
+            label="Download List as Excel / CSV file",
+            data=csv_data,
+            file_name=f"registered_members_{date.today().strftime('%m_%d_%Y')}.csv",
+            mime="text/csv"
+        )
+    else:
+        st.info("The database is currently loading or empty.")
+
 # Admin Panel Access Verification
 if admin_password:
     if admin_password == st.secrets["ADMIN_PASSWORD"]:
         st.sidebar.success("Correct Password!")
         st.write("---")
-        st.subheader("Saved Members List (Live Cloud Data Feed)")
-
-        try:
-            raw_url = st.secrets["connections"]["gsheets"]["spreadsheet"]
-            csv_url = get_clean_url(raw_url)
-            df_clean = pd.read_csv(csv_url)
-        except Exception:
-            df_clean = pd.DataFrame()
-
-        if not df_clean.empty:
-            if "Contact Number" in df_clean.columns:
-                df_clean["Contact Number"] = df_clean["Contact Number"].astype(str).str.replace(r'\.0$', '', regex=True)
-
-            if 'Row No.' not in df_clean.columns:
-                df_clean.insert(0, 'Row No.', range(1, 1 + len(df_clean)))
-            
-            # Name Search Functionality
-            search_col, empty_space = st.columns(2)
-            with search_col:
-                search_query = st.text_input("Search list by name:", value="")
-                
-            if search_query and "Full Name" in df_clean.columns:
-                df_clean = df_clean[df_clean['Full Name'].astype(str).str.contains(search_query, case=False, na=False)]
-
-            df_clean["Remove"] = False
-            if st.session_state.selected_remove_index in df_clean.index:
-                df_clean.loc[st.session_state.selected_remove_index, "Remove"] = True
-
-            editor_key = f"member_editor_{st.session_state.table_reset_counter}"
-
-            edited_df = st.data_editor(
-                df_clean,
-                use_container_width=False,
-                disabled=[col for col in df_clean.columns if col != "Remove"],
-                column_config={
-                    "Contact Number": st.column_config.TextColumn("Contact Number"),
-                    "Remove": st.column_config.CheckboxColumn(
-                        "Remove",
-                        help="Check this box to prepare row for cloud deletion",
-                        default=False,
-                    )
-                },
-                key=editor_key
-            )
-            
-            changed_rows = edited_df[edited_df["Remove"] != df_clean["Remove"]]
-            if not changed_rows.empty:
-                newly_checked = edited_df[edited_df["Remove"] == True]
-                if not newly_checked.empty:
-                    st.session_state.selected_remove_index = newly_checked.index[-1]
-                else:
-                    st.session_state.selected_remove_index = None
-                st.rerun()
-
-            # Deletion panel
-            marked_rows = edited_df[edited_df["Remove"] == True]
-            if not marked_rows.empty:
-                for idx, row in marked_rows.iterrows():
-                    target_name = row["Full Name"]
-
-                    box_col, alignment_col = st.columns(2)
-                    with box_col:
-                        st.error(f"Do you really want to remove {target_name}?")
-                        
-                        btn_col1, btn_col2, btn_spacer = st.columns(3)
-                        with btn_col1:
-                            if st.button("Yes", key=f"yes_cloud_{idx}"):
-                                delete_payload = {
-                                    "action": "delete",
-                                    "fullName": target_name
-                                }
-                                try:
-                                    script_url = st.secrets["SCRIPT_URL"]
-                                    req = urllib.request.Request(
-                                        script_url, 
-                                        data=json.dumps(delete_payload).encode("utf-8"), 
-                                        headers={"Content-Type": "application/json"}
-                                    )
-                                    urllib.request.urlopen(req)
-                                    st.session_state.table_reset_counter += 1
-                                    st.session_state.selected_remove_index = None
-                                    st.rerun()
-                                except Exception:
-                                    st.warning("Request processed locally, database synchronization pending.")
-                        with btn_col2:
-                            if st.button("No", key=f"no_cloud_{idx}"):
-                                st.session_state.table_reset_counter += 1
-                                st.session_state.selected_remove_index = None
-                                st.rerun()
-            
-            # Excel / CSV Data File Download Exporter
-            csv_data = df_clean.drop(columns=["Remove"]).to_csv(index=False).encode('utf-8')
-            st.download_button(
-                label="Download List as Excel / CSV file",
-                data=csv_data,
-                file_name=f"registered_members_{date.today().strftime('%m_%d_%Y')}.csv",
-                mime="text/csv"
-            )
-        else:
-            st.info("The database is currently loading or empty.")
+        admin_panel()
     else:
         st.sidebar.error("Wrong Password")
