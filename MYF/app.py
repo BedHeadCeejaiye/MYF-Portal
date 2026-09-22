@@ -139,6 +139,9 @@ admin_password = st.sidebar.text_input(
     "Enter Password:", type="password", key="final_sidebar_admin_password"
 )
 
+if "selected_remove_row" not in st.session_state:
+  st.session_state.selected_remove_row = None
+
 # Admin Panel Access Verification
 if admin_password:
   if admin_password == st.secrets["ADMIN_PASSWORD"]:
@@ -173,26 +176,15 @@ if admin_password:
         df_clean = df_clean[
             df_clean["Full Name"]
             .astype(str)
-            .str.contains(search_query, case=False, na=False)
+            .str.contains(search_query, case=False, na=False]
         ]
 
       df_clean["Remove"] = False
-        
-      def enforce_single_selection():
-        edited_data = st.session_state["member_editor"]
-        edited_rows = edited_data.get("edited_rows", {})
-
-        true_indices = []
-        for row_idx, changes in edited_rows.items():
-          if changes.get("Remove") == True:
-            true_indices.append(int(row_idx))
-
-        if len(true_indices) > 1:
-          latest_index = true_indices[-1]
-          for row_idx in true_indices[:-1]:
-            st.session_state["member_editor"]["edited_rows"][row_idx][
-                "Remove"
-            ] = False
+      if (
+          st.session_state.selected_remove_row is not None
+          and st.session_state.selected_remove_row in df_clean.index
+      ):
+        df_clean.loc[st.session_state.selected_remove_row, "Remove"] = True
 
       edited_df = st.data_editor(
           df_clean,
@@ -202,13 +194,29 @@ if admin_password:
               "Contact Number": st.column_config.TextColumn("Contact Number"),
               "Remove": st.column_config.CheckboxColumn(
                   "Remove",
-                  help="Check this box to prepare row for cloud deletion",
+                  help=(
+                      "Check this box to prepare row for cloud deletion (only"
+                      " one allowed)"
+                  ),
                   default=False,
               ),
           },
           key="member_editor",
-          on_change=enforce_single_selection,
       )
+
+      currently_true_rows = edited_df[edited_df["Remove"] == True].index.tolist()
+      new_selection = None
+      if currently_true_rows:
+        for r_idx in currently_true_rows:
+          if r_idx != st.session_state.selected_remove_row:
+            new_selection = r_idx
+            break
+        if new_selection is None:
+          new_selection = currently_true_rows[0]
+
+      if new_selection != st.session_state.selected_remove_row:
+        st.session_state.selected_remove_row = new_selection
+        st.rerun()
 
       # Deletion Panel Handler
       marked_rows = edited_df[edited_df["Remove"] == True]
@@ -234,6 +242,7 @@ if admin_password:
                   urllib.request.urlopen(req)
                   if "member_editor" in st.session_state:
                     del st.session_state["member_editor"]
+                  st.session_state.selected_remove_row = None
                   st.rerun()
                 except Exception:
                   st.warning(
@@ -244,6 +253,7 @@ if admin_password:
               if st.button("No", key=f"no_cloud_{idx}"):
                 if "member_editor" in st.session_state:
                   del st.session_state["member_editor"]
+                st.session_state.selected_remove_row = None
                 st.rerun()
 
       # Excel / CSV Data File Download Exporter
