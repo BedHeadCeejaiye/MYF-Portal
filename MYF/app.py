@@ -130,7 +130,7 @@ if admin_password:
                 df_clean = df_clean[df_clean['Full Name'].astype(str).str.contains(search_query, case=False, na=False)]
             
             df_clean["Remove"] = False
-            
+
             edited_df = st.data_editor(
                 df_clean,
                 use_container_width=False,
@@ -171,11 +171,15 @@ if admin_password:
                                         headers={"Content-Type": "application/json"}
                                     )
                                     urllib.request.urlopen(req)
+                                    if "member_editor" in st.session_state:
+                                        del st.session_state["member_editor"]
                                     st.rerun()
                                 except Exception:
                                     st.warning("Request processed locally, database synchronization pending.")
                         with btn_col2:
                             if st.button("No", key=f"no_cloud_{idx}"):
+                                if "member_editor" in st.session_state:
+                                    del st.session_state["member_editor"]
                                 st.rerun()
             
             # Excel / CSV Data File Download Exporter
