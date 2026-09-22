@@ -115,7 +115,6 @@ if admin_password:
 
             if 'Row No.' not in df_clean.columns:
                 df_clean.insert(0, 'Row No.', range(1, 1 + len(df_clean)))
-
             
             search_col, _ = st.columns(2)
             with search_col:
