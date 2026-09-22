@@ -171,13 +171,15 @@ if admin_password:
                                         headers={"Content-Type": "application/json"}
                                     )
                                     urllib.request.urlopen(req)
+                                    if "member_editor" in st.session_state:
+                                        del st.session_state["member_editor"]
                                     st.rerun()
                                 except Exception:
                                     st.warning("Request processed locally, database synchronization pending.")
                         with btn_col2:
                             if st.button("No", key=f"no_cloud_{idx}"):
                                 if "member_editor" in st.session_state:
-                                    st.session_state["member_editor"]["edited_rows"][int(idx)]["Remove"] = False
+                                    del st.session_state["member_editor"]
                                 st.rerun()
             
             # Excel / CSV Data File Download Exporter
