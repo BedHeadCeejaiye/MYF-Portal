@@ -4,29 +4,6 @@ import json
 import urllib.request
 from datetime import datetime, date
 
-# Database Setup
-conn = sqlite3.connect('member_data.db', check_same_thread=False)
-cursor = conn.cursor()
-
-# Database Table Creation
-cursor.execute('''
-    CREATE TABLE IF NOT EXISTS members (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        full_name TEXT,
-        birthday TEXT,
-        gender TEXT,
-        membership_status TEXT,
-        church TEXT,
-        facebook_profile TEXT,
-        contact_number TEXT,
-        address TEXT,
-        parent_name TEXT,
-        entry_date TEXT,
-        attendance TEXT
-    )
-''')
-conn.commit()
-
 # Web Page Configuration
 st.set_page_config(page_title="Taytay Methodist Church", layout="wide")
 
@@ -47,17 +24,14 @@ verses_list = [
 ]
 today_index = date.today().day % len(verses_list)
 
-# Verse Display Section
 st.subheader("📖 Verse of the Day")
 st.markdown(f"## **{verses_list[today_index]}**")
 st.write("---")
 
-# Welcome Header Messages
 st.title("Welcome to our Youth Fellowship Portal!")
 st.write("We are glad you are here! Please take a moment to fill out the form below so we can stay connected.")
 st.write("---")
 
-# Registration Form Layout
 st.subheader("✝️ New Registration Form")
 with st.form("registration_form", clear_on_submit=True):
     col1, col2 = st.columns(2)
@@ -83,7 +57,6 @@ with st.form("registration_form", clear_on_submit=True):
 
     submit_button = st.form_submit_button("Save Registration Details")
 
-    # Form Submission Handler
     if submit_button:
         if full_name.strip() == "":
             st.error("Full Name is a required field!")
@@ -143,48 +116,30 @@ if admin_password:
 
             if 'Row No.' not in df_clean.columns:
                 df_clean.insert(0, 'Row No.', range(1, 1 + len(df_clean)))
-            
-            # Name Search Functionality
-            search_col, empty_space = st.columns(2)
+
+            search_col, delete_col = st.columns(2)
             with search_col:
                 search_query = st.text_input("Search list by name:", value="")
                 
             if search_query and "Full Name" in df_clean.columns:
                 df_clean = df_clean[df_clean['Full Name'].astype(str).str.contains(search_query, case=False, na=False)]
-
-            df_clean["Remove"] = False
-
-            edited_df = st.data_editor(
-                df_clean,
-                use_container_width=False,
-                disabled=[col for col in df_clean.columns if col != "Remove"],
-                column_config={
-                    "Contact Number": st.column_config.TextColumn("Contact Number"),
-                    "Remove": st.column_config.CheckboxColumn(
-                        "Remove",
-                        help="Check this box to prepare row for cloud deletion",
-                        default=False,
-                    )
-                },
-                key="member_editor"
-            )
             
-            # Delition Confimation
-            marked_rows = edited_df[edited_df["Remove"] == True]
-            if not marked_rows.empty:
-                for idx, row in marked_rows.iterrows():
-                    target_name = row["Full Name"]
-
-                    box_col, alignment_col = st.columns(2)
-                    with box_col:
-                        st.error(f"Do you really want to remove {target_name}?")
+            # Deletion Panel Handler
+            with delete_col:
+                if "Full Name" in df_clean.columns:
+                    member_options = df_clean['Full Name'].astype(str).tolist()
+                    selected_member = st.selectbox("Remove a member:", ["Select a name..."] + member_options)
+                    
+                    if selected_member != "Select a name...":
+                        # Red Confirmation Warning Box (Auto-adjusts width)
+                        st.error(f"Do you really want to remove {selected_member}?")
                         
-                        btn_col1, btn_col2, btn_spacer = st.columns(3)
+                        btn_col1, btn_col2, _ = st.columns([1, 1, 4])
                         with btn_col1:
-                            if st.button("Yes", key=f"yes_cloud_{idx}"):
+                            if st.button("Yes", key="confirm_delete_cloud"):
                                 delete_payload = {
                                     "action": "delete",
-                                    "fullName": target_name
+                                    "fullName": selected_member
                                 }
                                 try:
                                     script_url = st.secrets["SCRIPT_URL"]
@@ -194,15 +149,17 @@ if admin_password:
                                         headers={"Content-Type": "application/json"}
                                     )
                                     urllib.request.urlopen(req)
+                                    st.success(f"Successfully deleted {selected_member} from the cloud database!")
                                     st.rerun()
                                 except Exception:
-                                    st.warning("Request processed locally, database synchronization pending.")
+                                    st.warning("Request sent locally, but the online database delete script is pending setup.")
                         with btn_col2:
-                            if st.button("No", key=f"no_cloud_{idx}"):
+                            if st.button("No", key="cancel_delete_cloud"):
                                 st.rerun()
             
-            # Excel / CSV Data File Download Exporter
-            csv_data = df_clean.drop(columns=["Remove"]).to_csv(index=False).encode('utf-8')
+            st.dataframe(df_clean, use_container_width=True)
+            
+            csv_data = df_clean.to_csv(index=False).encode('utf-8')
             st.download_button(
                 label="Download List as Excel / CSV file",
                 data=csv_data,
