@@ -65,6 +65,7 @@ with st.form("registration_form", clear_on_submit=True):
             current_now = datetime.now().strftime("%m/%d/%Y %H:%M:%S")
             
             payload = {
+                "action": "register",
                 "fullName": full_name,
                 "birthday": bday_str,
                 "gender": gender,
@@ -110,18 +111,51 @@ if admin_password:
             df_clean = pd.DataFrame()
 
         if not df_clean.empty:
+
             if "Contact Number" in df_clean.columns:
                 df_clean["Contact Number"] = df_clean["Contact Number"].astype(str).str.replace(r'\.0$', '', regex=True)
 
             if 'Row No.' not in df_clean.columns:
                 df_clean.insert(0, 'Row No.', range(1, 1 + len(df_clean)))
             
-            search_col, _ = st.columns(2)
+            search_col, delete_col = st.columns(2)
             with search_col:
                 search_query = st.text_input("Search list by name:", value="")
                 
             if search_query and "Full Name" in df_clean.columns:
                 df_clean = df_clean[df_clean['Full Name'].astype(str).str.contains(search_query, case=False, na=False)]
+            
+            # Deletion Panel Handler
+            with delete_col:
+                if "Full Name" in df_clean.columns:
+                    member_options = df_clean['Full Name'].astype(str).tolist()
+                    selected_member = st.selectbox("Remove a member:", ["Select a name..."] + member_options)
+                    
+                    if selected_member != "Select a name...":
+                        st.error(f"Do you really want to remove {selected_member}?")
+                        
+                        btn_col1, btn_col2, _ = st.columns([1, 1, 4])
+                        with btn_col1:
+                            if st.button("Yes", key="confirm_delete_cloud"):
+                                delete_payload = {
+                                    "action": "delete",
+                                    "fullName": selected_member
+                                }
+                                try:
+                                    script_url = st.secrets["SCRIPT_URL"]
+                                    req = urllib.request.Request(
+                                        script_url, 
+                                        data=json.dumps(delete_payload).encode("utf-8"), 
+                                        headers={"Content-Type": "application/json"}
+                                    )
+                                    urllib.request.urlopen(req)
+                                    st.success(f"Successfully deleted {selected_member} from the cloud database!")
+                                    st.rerun()
+                                except Exception:
+                                    st.warning("Request sent locally, but the online database delete script is pending setup.")
+                        with btn_col2:
+                            if st.button("No", key="cancel_delete_cloud"):
+                                st.rerun()
             
             st.dataframe(df_clean, use_container_width=True)
             
