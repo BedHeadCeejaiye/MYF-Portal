@@ -102,7 +102,7 @@ with st.form("registration_form", clear_on_submit=True):
     )
 
     st.write("Contact Number:")
-    prefix_col, number_col = st.columns([0.5, 9.5])
+    prefix_col, number_col = st.columns([1.2, 8.8])
     with prefix_col:
       st.text_input(
           "Prefix", value="09", disabled=True, label_visibility="collapsed"
