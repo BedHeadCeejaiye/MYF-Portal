@@ -13,7 +13,6 @@ def get_clean_url(url_string):
     return url_string.split("/edit")[0] + "/export?format=csv"
   return url_string
 
-
 # Daily Bible Verse Setup
 verses_list = [
     (
@@ -52,11 +51,11 @@ st.write(
 st.write("---")
 
 tab_register, tab_attendance = st.tabs(
-    ["📝 New Member Registration", "✅ Fellowship Attendance Check-In"]
+    ["Registration Form", "Attendance Check-In"]
 )
 
 with tab_register:
-  st.subheader("✝ New Registration Form")
+  st.subheader("✝️ New Registration Form")
   with st.form("registration_form", clear_on_submit=True):
     col1, col2 = st.columns(2)
 
