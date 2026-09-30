@@ -236,7 +236,7 @@ if admin_password:
   if admin_password == st.secrets["ADMIN_PASSWORD"]:
     st.sidebar.success("Correct Password!")
     st.write("---")
-    st.subheader("Admin Control Panel: Live Data Feeds")
+    st.subheader("Admin Dashboard")
 
     admin_tab1, admin_tab2 = st.tabs(["Database Records", "Attendance Logs"])
 
