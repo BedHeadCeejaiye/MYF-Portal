@@ -57,69 +57,71 @@ with tab_register:
     st.subheader("✝ Registration Form")
     
     with st.form("registration_form", clear_on_submit=True):
-        col1, col2 = st.columns(2)
+        form_col, _ = st.columns([2, 1])
+        with form_col:
+            col1, col2 = st.columns(2)
 
-        with col1:
-            full_name = st.text_input("Full Name:", placeholder="e.g., John Doe")
-            birthday = st.date_input(
-                "Birthday:",
-                value=date(2000, 1, 1),
-                min_value=date(1900, 1, 1),
-                max_value=date.today(),
-                format="MM/DD/YYYY",
-            )
+            with col1:
+                full_name = st.text_input("Full Name:", placeholder="e.g., John Doe")
+                birthday = st.date_input(
+                    "Birthday:",
+                    value=date(2000, 1, 1),
+                    min_value=date(1900, 1, 1),
+                    max_value=date.today(),
+                    format="MM/DD/YYYY",
+                )
 
-            gender = st.selectbox(
-                "Gender:",
-                ["Male", "Female", "Other"],
-                index=None,
-                placeholder="Select Gender",
-            )
-            membership_status = st.selectbox(
-                "Membership Status:",
-                ["Active Member", "First-Time Visitor"],
-                index=None,
-                placeholder="Select Status",
-            )
-            church = st.selectbox(
-                "Church:",
-                [
-                    "Taytay Methodist Church",
-                    "Upper Javier Methodist Mission",
-                    "Baras Mission Methodist Church",
-                    "Halayhayin Peace Methodist Church",
-                    "Tanay Methodist Mission",
-                    "Higher Ground Methodist Church",
-                    "River of Life Methodist Church",
-                    "O Mira Gratia Evangelical Brethren Church",
-                ],
-                index=None,
-                placeholder="Select Church",
-            )
+                gender = st.selectbox(
+                    "Gender:",
+                    ["Male", "Female", "Other"],
+                    index=None,
+                    placeholder="Select Gender",
+                )
+                membership_status = st.selectbox(
+                    "Membership Status:",
+                    ["Active Member", "First-Time Visitor"],
+                    index=None,
+                    placeholder="Select Status",
+                )
+                church = st.selectbox(
+                    "Church:",
+                    [
+                        "Taytay Methodist Church",
+                        "Upper Javier Methodist Mission",
+                        "Baras Mission Methodist Church",
+                        "Halayhayin Peace Methodist Church",
+                        "Tanay Methodist Mission",
+                        "Higher Ground Methodist Church",
+                        "River of Life Methodist Church",
+                        "O Mira Gratia Evangelical Brethren Church",
+                    ],
+                    index=None,
+                    placeholder="Select Church",
+                )
 
-        with col2:
-            parent_name = st.text_input(
-                "Parent's / Guardian's Name:", placeholder="e.g., Mary Doe"
-            )
-            fb_profile = st.text_input(
-                "Facebook Profile Link or Name:",
-                placeholder="e.g., facebook.com/johndoe",
-            )
+            with col2:
+                parent_name = st.text_input(
+                    "Parent's / Guardian's Name:", placeholder="e.g., Mary Doe"
+                )
+                fb_profile = st.text_input(
+                    "Facebook Profile Link or Name:",
+                    placeholder="e.g., facebook.com/johndoe",
+                )
 
-            contact_number = st.text_input(
-                "Contact Number:",
-                placeholder="09123456789",
-                max_chars=11,
-                help="Must be 11 digits and start with 09 (numbers only)",
-            )
+                contact_number = st.text_input(
+                    "Contact Number:",
+                    placeholder="09123456789",
+                    max_chars=11,
+                    help="Must be 11 digits and start with 09 (numbers only)",
+                )
 
-            address = st.text_area(
-                "Complete Address:",
-                height=100,
-                placeholder="e.g., 123 Street Name, Barangay, City",
-            )
+                address = st.text_area(
+                    "Complete Address:",
+                    height=100,
+                    placeholder="e.g., 123 Street Name, Barangay, City",
+                )
 
-        submit_button = st.form_submit_button("Save Registration Details")
+            submit_button = st.form_submit_button("Save Registration Details")
 
         if submit_button:
             clean_contact = "".join(filter(str.isdigit, contact_number))
