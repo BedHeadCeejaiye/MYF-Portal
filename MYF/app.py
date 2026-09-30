@@ -12,7 +12,6 @@ def get_clean_url(url_string):
         return url_string.split("/edit")[0] + "/export?format=csv"
     return url_string
 
-
 # Daily Bible Verse Setup
 verses_list = [
     (
@@ -196,8 +195,10 @@ with tab_attendance:
     st.subheader("Attendance Check-In")
 
     with st.form("attendance_form", clear_on_submit=True):
-        att_name = st.text_input("Full Name:", placeholder="e.g., John Doe")
-        att_date = st.date_input("Attendance Date:", value=date.today())
+        col_att, _ = st.columns([1, 2])
+        with col_att:
+            att_name = st.text_input("Full Name:", placeholder="e.g., John Doe")
+            att_date = st.date_input("Attendance Date:", value=date.today())
 
         submit_attendance = st.form_submit_button("Check-In")
 
