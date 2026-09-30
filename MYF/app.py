@@ -281,7 +281,7 @@ if admin_password:
       else:
         st.info("The database is currently loading or empty.")
 
-    with admin_tab2:
+   with admin_tab2:
       st.subheader("Attendance Logs")
       try:
         raw_url = st.secrets["connections"]["gsheets"]["spreadsheet"]
@@ -319,7 +319,7 @@ if admin_password:
               .str.contains(search_att, case=False, na=False)
           ]
 
-        st.dataframe(df_att, use_container_width=True)
+        st.dataframe(df_att, use_container_width=False)
         att_csv_data = df_att.to_csv(index=False).encode("utf-8")
         st.download_button(
             label="Download Attendance Logs as CSV",
