@@ -54,7 +54,7 @@ tab_register, tab_attendance = st.tabs(
 )
 
 with tab_register:
-    st.subheader("✝ Registration Form")
+    st.subheader("✝ New Registration Form")
     
     with st.form("registration_form", clear_on_submit=True):
         form_col, _ = st.columns([2, 1])
@@ -112,6 +112,7 @@ with tab_register:
                     "Contact Number:",
                     placeholder="09123456789",
                     max_chars=11,
+                    help="Must be 11 digits and start with 09 (numbers only)",
                 )
 
                 address = st.text_area(
@@ -139,7 +140,8 @@ with tab_register:
                 st.error("Please enter your **Facebook Profile Link or Name**.")
             elif not clean_contact.startswith("09") or len(clean_contact) != 11:
                 st.error(
-                    "Please enter a valid **Contact Number**."
+                    "Please enter a valid **Contact Number** (must be 11 digits and start"
+                    " with '09')."
                 )
             elif address.strip() == "":
                 st.error("Please enter your **Complete Address**.")
@@ -193,6 +195,7 @@ with tab_register:
 
 with tab_attendance:
     st.subheader("Attendance Check-In")
+    st.write("Quick check-in: Just type your name and select the date!")
 
     with st.form("attendance_form", clear_on_submit=True):
         col_att, _ = st.columns([1, 2])
@@ -206,13 +209,11 @@ with tab_attendance:
             if att_name.strip() == "":
                 st.error("Please enter your **Full Name**.")
             else:
-                current_now = datetime.now().strftime("%m/%d/%Y %H:%M:%S")
                 att_date_str = att_date.strftime("%m/%d/%Y")
 
                 payload = {
                     "action": "attendance",
                     "fullName": att_name,
-                    "timestamp": current_now,
                     "attendanceDate": att_date_str,
                 }
 
@@ -251,7 +252,7 @@ if admin_password:
         admin_tab1, admin_tab2 = st.tabs(["Database Records", "Attendance Logs"])
 
         with admin_tab1:
-            st.subheader("Saved Members List")
+            st.subheader("Saved Members List (Live Cloud Data Feed)")
             try:
                 raw_url = st.secrets["connections"]["gsheets"]["spreadsheet"]
                 csv_url = get_clean_url(raw_url)
@@ -274,7 +275,7 @@ if admin_password:
                 col_s1, _ = st.columns([1, 2])
                 with col_s1:
                     search_query = st.text_input(
-                        "Search members by name:", value=""
+                        "Search list by name:", value=""
                     )
 
                 if search_query and "Full Name" in df_clean.columns:
@@ -287,7 +288,7 @@ if admin_password:
                 st.dataframe(df_clean, use_container_width=False)
                 csv_data = df_clean.to_csv(index=False).encode("utf-8")
                 st.download_button(
-                    label="Download Members List as CSV",
+                    label="Download List as Excel/CSV file",
                     data=csv_data,
                     file_name=f"registered_members_{date.today().strftime('%m_%d_%Y')}.csv",
                     mime="text/csv",
@@ -312,16 +313,17 @@ if admin_password:
                 if "Row No." not in df_att.columns:
                     df_att.insert(0, "Row No.", range(1, 1 + len(df_att)))
 
+                # Clean up column headers for date sequence
                 new_columns = []
                 date_idx = 0
                 for col in df_att.columns:
-                    if col in ["Row No.", "Full name", "Time stamp"]:
+                    if col in ["Row No.", "Full name", "Full Name"]:
                         new_columns.append(col)
                     else:
                         if date_idx == 0:
-                            new_columns.append("Date")
+                            new_columns.append("Date 1")
                         else:
-                            new_columns.append(" " * date_idx)
+                            new_columns.append(f"Date {date_idx + 1}")
                         date_idx += 1
                 df_att.columns = new_columns
 
@@ -331,9 +333,10 @@ if admin_password:
                         "Search attendance by name:", value=""
                     )
 
-                if search_att and "Full name" in df_att.columns:
+                name_col = "Full name" if "Full name" in df_att.columns else "Full Name"
+                if search_att and name_col in df_att.columns:
                     df_att = df_att[
-                        df_att["Full name"]
+                        df_att[name_col]
                         .astype(str)
                         .str.contains(search_att, case=False, na=False)
                     ]
