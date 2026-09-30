@@ -210,11 +210,13 @@ with tab_attendance:
                 st.error("Please enter your **Full Name**.")
             else:
                 att_date_str = att_date.strftime("%m/%d/%Y")
+                current_time_str = datetime.now().strftime("%H:%M:%S")
+                attendance_value = f"{att_date_str} {current_time_str}"
 
                 payload = {
                     "action": "attendance",
                     "fullName": att_name,
-                    "attendanceDate": att_date_str,
+                    "attendanceDate": attendance_value,
                 }
 
                 try:
@@ -226,14 +228,13 @@ with tab_attendance:
                     )
                     urllib.request.urlopen(req)
                     st.success(
-                        f"✅ Attendance recorded for **{att_name}** on **{att_date_str}**!"
+                        f"✅ Attendance recorded for **{att_name}** at **{attendance_value}**!"
                     )
                 except Exception as e:
                     st.error(
                         "Details verified locally, but the online database link is pending"
                         " setup."
                     )
-
 st.write("---")
 
 # Admin Panel
