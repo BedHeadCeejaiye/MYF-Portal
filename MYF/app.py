@@ -139,7 +139,9 @@ with st.form("registration_form", clear_on_submit=True):
       bday_str = birthday.strftime("%m/%d/%Y") if birthday else ""
       current_now = datetime.now().strftime("%m/%d/%Y %H:%M:%S")
 
-      formatted_contact = f"'{clean_contact}"
+      formatted_contact = (
+          f"'{clean_contact[:4]}-{clean_contact[4:7]}-{clean_contact[7:]}"
+      )
 
       payload = {
           "action": "register",
