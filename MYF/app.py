@@ -57,46 +57,54 @@ with st.form("registration_form", clear_on_submit=True):
   col1, col2 = st.columns(2)
 
   with col1:
-    full_name = st.text_input("Full Name *:", placeholder="e.g., John Doe")
+    full_name = st.text_input("Full Name:", placeholder="e.g., John Doe")
     birthday = st.date_input(
-        "Birthday *:",
+        "Birthday:",
         value=date(2000, 1, 1),
         min_value=date(1900, 1, 1),
         max_value=date.today(),
         format="MM/DD/YYYY",
     )
-    gender = st.selectbox("Gender *:", ["Select Gender", "Male", "Female", "Other"])
+    gender = st.selectbox(
+        "Gender:",
+        ["Male", "Female", "Other"],
+        index=None,
+        placeholder="Select Gender",
+    )
     membership_status = st.selectbox(
-        "Membership Status *:",
-        ["Select Status", "Active Member", "First-Time Visitor"],
+        "Membership Status:",
+        ["Active Member", "First-Time Visitor"],
+        index=None,
+        placeholder="Select Status",
     )
     church = st.selectbox(
-        "Church *:",
+        "Church:",
         [
-            "Select Church",
             "Taytay Methodist Church",
             "Upper Javier Methodist Mission",
             "Baras Mission Methodist Church",
             "Halayhayin Peace Methodist Church",
             "Tanay Methodist Mission",
-            "Higher Ground Methodist Church", 
+            "Higher Ground Methodist Church",
             "River of Life Methodist Church",
             "O Mira Gratia Evangelical Brethren Church",
         ],
+        index=None,
+        placeholder="Select Church",
     )
 
   with col2:
     parent_name = st.text_input(
-        "Parent's / Guardian's Name *:", placeholder="e.g., Mary Doe"
+        "Parent's / Guardian's Name:", placeholder="e.g., Mary Doe"
     )
     fb_profile = st.text_input(
-        "Facebook Profile Link or Name *:", placeholder="e.g., facebook.com/johndoe"
+        "Facebook Profile Link or Name:", placeholder="e.g., facebook.com/johndoe"
     )
     contact_number = st.text_input(
-        "Contact Number *:", placeholder="e.g., 09123456789"
+        "Contact Number:", placeholder="e.g., 09123456789"
     )
     address = st.text_area(
-        "Complete Address *:",
+        "Complete Address:",
         height=100,
         placeholder="e.g., 123 Street Name, Barangay, City",
     )
@@ -107,9 +115,9 @@ with st.form("registration_form", clear_on_submit=True):
   if submit_button:
     if (
         full_name.strip() == ""
-        or gender == "Select Gender"
-        or membership_status == "Select Status"
-        or church == "Select Church"
+        or not gender
+        or not membership_status
+        or not church
         or parent_name.strip() == ""
         or fb_profile.strip() == ""
         or contact_number.strip() == ""
