@@ -236,7 +236,7 @@ with tab_attendance:
 
 st.write("---")
 
-# Sidebar Authentication Controls
+# Admin Panel
 st.sidebar.title("🔐 Admin Panel")
 admin_password = st.sidebar.text_input(
     "Enter Password:", type="password", key="final_sidebar_admin_password"
@@ -296,7 +296,7 @@ if admin_password:
             else:
                 st.info("The database is currently loading or empty.")
 
-        with admin_tab2:
+       with admin_tab2:
             st.subheader("Attendance Logs")
             try:
                 raw_url = st.secrets["connections"]["gsheets"]["spreadsheet"]
@@ -314,16 +314,16 @@ if admin_password:
                     df_att.insert(0, "Row No.", range(1, 1 + len(df_att)))
 
                 new_columns = []
-                date_idx = 0
+                date_count = 0
                 for col in df_att.columns:
-                    if col in ["Row No.", "Full name", "Full Name", "Date"]:
+                    if col in ["Row No.", "Full name", "Full Name"]:
                         new_columns.append(col)
                     else:
-                        if date_idx == 0:
+                        if date_count == 0:
                             new_columns.append("Date")
                         else:
-                            new_columns.append(" " * date_idx)
-                        date_idx += 1
+                            new_columns.append(" " * date_count)
+                        date_count += 1
                 df_att.columns = new_columns
 
                 col_s2, _ = st.columns([1, 2])
