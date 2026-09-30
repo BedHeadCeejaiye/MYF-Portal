@@ -116,25 +116,31 @@ with st.form("registration_form", clear_on_submit=True):
 
   submit_button = st.form_submit_button("Save Registration Details")
 
-  # Form Submission Handler
+  # Form Submission Handler with Specific Field Validation
   if submit_button:
     clean_contact = "".join(filter(str.isdigit, contact_number))
 
-    if (
-        full_name.strip() == ""
-        or not gender
-        or not membership_status
-        or not church
-        or parent_name.strip() == ""
-        or fb_profile.strip() == ""
-        or address.strip() == ""
-        or not clean_contact.startswith("09")
-        or len(clean_contact) != 11
+    if full_name.strip() == "":
+      st.error("Please enter your **Full Name**.")
+    elif not gender:
+      st.error("Please select your **Gender**.")
+    elif not membership_status:
+      st.error("Please select your **Membership Status**.")
+    elif not church:
+      st.error("Please select your **Church**.")
+    elif parent_name.strip() == "":
+      st.error("Please enter your **Parent's / Guardian's Name**.")
+    elif fb_profile.strip() == "":
+      st.error("Please enter your **Facebook Profile Link or Name**.")
+    elif (
+        not clean_contact.startswith("09") or len(clean_contact) != 11
     ):
       st.error(
-          "All fields are required, and the contact number must be a valid"
-          " 11-digit number starting with '09' (numbers only)!"
+          "Please enter a valid **Contact Number** (must be 11 digits and start"
+          " with '09')."
       )
+    elif address.strip() == "":
+      st.error("Please enter your **Complete Address**.")
     else:
       bday_str = birthday.strftime("%m/%d/%Y") if birthday else ""
       current_now = datetime.now().strftime("%m/%d/%Y %H:%M:%S")
