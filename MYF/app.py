@@ -288,7 +288,7 @@ if admin_password:
         base_csv_url = get_clean_url(raw_url)
         attendance_csv_url = (
             base_csv_url.split("export?format=csv")[0]
-            + "export?format=csv&gid=#gid=1206935683"
+            + "export?format=csv&gid=1206935683"
         )
         df_att = pd.read_csv(attendance_csv_url)
       except Exception:
