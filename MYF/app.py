@@ -183,7 +183,7 @@ with tab_register:
           )
 
 with tab_attendance:
-  st.subheader("📋 Fellowship Attendance Check-In")
+  st.subheader("Attendance Check-In")
   st.write("Quick check-in: Just type your name and select the date!")
 
   with st.form("attendance_form", clear_on_submit=True):
