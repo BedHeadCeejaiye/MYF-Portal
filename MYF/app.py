@@ -52,7 +52,7 @@ st.write(
 st.write("---")
 
 # Registration Form Layout
-st.subheader("✝️️ New Registration Form")
+st.subheader("✝ New Registration Form")
 with st.form("registration_form", clear_on_submit=True):
   col1, col2 = st.columns(2)
 
@@ -101,19 +101,27 @@ with st.form("registration_form", clear_on_submit=True):
         "Facebook Profile Link or Name:", placeholder="e.g., facebook.com/johndoe"
     )
 
-    st.write("Contact Number:")
-    prefix_col, number_col = st.columns([1.2, 8.8])
-    with prefix_col:
-      st.text_input(
-          "Prefix", value="09", disabled=True, label_visibility="collapsed"
-      )
-    with number_col:
-      contact_suffix = st.text_input(
-          "Contact Suffix",
-          placeholder="123456789",
-          max_chars=9,
-          label_visibility="collapsed",
-      )
+    if "contact_num" not in st.session_state:
+      st.session_state.contact_num = "09"
+
+
+    def update_contact():
+      val = st.session_state.contact_num
+      digits_only = "".join(filter(str.isdigit, val))
+      if not digits_only.startswith("09"):
+        digits_only = "09" + digits_only.lstrip("0").lstrip("9")
+      if len(digits_only) > 11:
+        digits_only = digits_only[:11]
+      st.session_state.contact_num = digits_only
+
+
+    contact_number = st.text_input(
+        "Contact Number:",
+        key="contact_num",
+        on_change=update_contact,
+        placeholder="09123456789",
+        max_chars=11,
+    )
 
     address = st.text_area(
         "Complete Address:",
@@ -125,9 +133,7 @@ with st.form("registration_form", clear_on_submit=True):
 
   # Form Submission Handler
   if submit_button:
-    # Filter suffix to numbers only
-    clean_suffix = "".join(filter(str.isdigit, contact_suffix))
-    full_contact_number = "09" + clean_suffix
+    clean_contact = st.session_state.get("contact_num", "09")
 
     if (
         full_name.strip() == ""
@@ -136,18 +142,18 @@ with st.form("registration_form", clear_on_submit=True):
         or not church
         or parent_name.strip() == ""
         or fb_profile.strip() == ""
-        or len(clean_suffix) != 9
+        or len(clean_contact) != 11
         or address.strip() == ""
     ):
       st.error(
-          "All fields are required, and the contact number must be exactly 9"
-          " digits after '09'!"
+          "All fields are required, and the contact number must be a complete"
+          " 11-digit number starting with '09'!"
       )
     else:
       bday_str = birthday.strftime("%m/%d/%Y") if birthday else ""
       current_now = datetime.now().strftime("%m/%d/%Y %H:%M:%S")
 
-      formatted_contact = f"'{full_contact_number}"
+      formatted_contact = f"'{clean_contact}"
 
       payload = {
           "action": "register",
