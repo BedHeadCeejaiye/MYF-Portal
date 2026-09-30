@@ -313,17 +313,16 @@ if admin_password:
                 if "Row No." not in df_att.columns:
                     df_att.insert(0, "Row No.", range(1, 1 + len(df_att)))
 
-                # Clean up column headers for date sequence
                 new_columns = []
                 date_idx = 0
                 for col in df_att.columns:
-                    if col in ["Row No.", "Full name", "Full Name"]:
+                    if col in ["Row No.", "Full name", "Full Name", "Date"]:
                         new_columns.append(col)
                     else:
                         if date_idx == 0:
-                            new_columns.append("Date 1")
+                            new_columns.append("Date")
                         else:
-                            new_columns.append(f"Date {date_idx + 1}")
+                            new_columns.append(" " * date_idx)
                         date_idx += 1
                 df_att.columns = new_columns
 
@@ -333,7 +332,7 @@ if admin_password:
                         "Search attendance by name:", value=""
                     )
 
-                name_col = "Full name" if "Full name" in df_att.columns else "Full Name"
+                name_col = "Full name" if "Full name" in df_att.columns else ("Full Name" if "Full Name" in df_att.columns else df_att.columns[1])
                 if search_att and name_col in df_att.columns:
                     df_att = df_att[
                         df_att[name_col]
