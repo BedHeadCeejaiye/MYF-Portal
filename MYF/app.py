@@ -54,7 +54,7 @@ tab_register, tab_attendance = st.tabs(
 )
 
 with tab_register:
-    st.subheader("✝ New Registration Form")
+    st.subheader("✝ Registration Form")
     
     with st.form("registration_form", clear_on_submit=True):
         form_col, _ = st.columns([2, 1])
@@ -112,7 +112,6 @@ with tab_register:
                     "Contact Number:",
                     placeholder="09123456789",
                     max_chars=11,
-                    help="Must be 11 digits and start with 09 (numbers only)",
                 )
 
                 address = st.text_area(
@@ -195,7 +194,6 @@ with tab_register:
 
 with tab_attendance:
     st.subheader("Attendance Check-In")
-    st.write("Quick check-in: Just type your name and select the date!")
 
     with st.form("attendance_form", clear_on_submit=True):
         col_att, _ = st.columns([1, 2])
