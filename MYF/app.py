@@ -296,7 +296,7 @@ if admin_password:
             else:
                 st.info("The database is currently loading or empty.")
 
-       with admin_tab2:
+        with admin_tab2:
             st.subheader("Attendance Logs")
             try:
                 raw_url = st.secrets["connections"]["gsheets"]["spreadsheet"]
@@ -313,6 +313,7 @@ if admin_password:
                 if "Row No." not in df_att.columns:
                     df_att.insert(0, "Row No.", range(1, 1 + len(df_att)))
 
+                # Ensure 100% unique column names for PyArrow
                 new_columns = []
                 date_count = 0
                 for col in df_att.columns:
