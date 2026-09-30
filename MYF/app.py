@@ -100,9 +100,21 @@ with st.form("registration_form", clear_on_submit=True):
     fb_profile = st.text_input(
         "Facebook Profile Link or Name:", placeholder="e.g., facebook.com/johndoe"
     )
-    contact_number = st.text_input(
-        "Contact Number:", placeholder="e.g., 09123456789"
-    )
+
+    st.write("Contact Number:")
+    prefix_col, number_col = st.columns([1, 4])
+    with prefix_col:
+      st.text_input(
+          "Prefix", value="09", disabled=True, label_visibility="collapsed"
+      )
+    with number_col:
+      contact_suffix = st.text_input(
+          "Contact Suffix",
+          placeholder="123456789",
+          max_chars=9,
+          label_visibility="collapsed",
+      )
+
     address = st.text_area(
         "Complete Address:",
         height=100,
@@ -113,6 +125,8 @@ with st.form("registration_form", clear_on_submit=True):
 
   # Form Submission Handler
   if submit_button:
+    full_contact_number = "09" + contact_suffix.strip()
+
     if (
         full_name.strip() == ""
         or not gender
@@ -120,13 +134,18 @@ with st.form("registration_form", clear_on_submit=True):
         or not church
         or parent_name.strip() == ""
         or fb_profile.strip() == ""
-        or contact_number.strip() == ""
+        or len(contact_suffix.strip()) != 9
+        or not contact_suffix.strip().isdigit()
         or address.strip() == ""
     ):
-      st.error("All fields are required! Please complete the form.")
+      st.error(
+          "All fields are required, and the contact number must be exactly 9"
+          " digits after '09'!"
+      )
     else:
       bday_str = birthday.strftime("%m/%d/%Y") if birthday else ""
       current_now = datetime.now().strftime("%m/%d/%Y %H:%M:%S")
+      formatted_contact = f"'{full_contact_number}"
 
       payload = {
           "action": "register",
@@ -137,7 +156,7 @@ with st.form("registration_form", clear_on_submit=True):
           "church": church,
           "parentName": parent_name,
           "fbProfile": fb_profile,
-          "contactNumber": contact_number,
+          "contactNumber": formatted_contact,
           "address": address,
           "registrationDate": current_now,
       }
@@ -188,6 +207,7 @@ if admin_password:
             df_clean["Contact Number"]
             .astype(str)
             .str.replace(r"\.0$", "", regex=True)
+            .str.replace("'", "", regex=False)
         )
 
       if "Row No." not in df_clean.columns:
