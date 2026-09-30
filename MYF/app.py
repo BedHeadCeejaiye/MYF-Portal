@@ -112,7 +112,6 @@ with tab_register:
                     "Contact Number:",
                     placeholder="09123456789",
                     max_chars=11,
-                    help="Must be 11 digits and start with 09 (numbers only)",
                 )
 
                 address = st.text_area(
@@ -140,8 +139,7 @@ with tab_register:
                 st.error("Please enter your **Facebook Profile Link or Name**.")
             elif not clean_contact.startswith("09") or len(clean_contact) != 11:
                 st.error(
-                    "Please enter a valid **Contact Number** (must be 11 digits and start"
-                    " with '09')."
+                    "Please enter a valid **Contact Number**."
                 )
             elif address.strip() == "":
                 st.error("Please enter your **Complete Address**.")
