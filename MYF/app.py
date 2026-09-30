@@ -253,7 +253,7 @@ if admin_password:
         admin_tab1, admin_tab2 = st.tabs(["Database Records", "Attendance Logs"])
 
         with admin_tab1:
-            st.subheader("Saved Members List (Live Cloud Data Feed)")
+            st.subheader("Saved Members List")
             try:
                 raw_url = st.secrets["connections"]["gsheets"]["spreadsheet"]
                 csv_url = get_clean_url(raw_url)
