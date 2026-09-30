@@ -46,144 +46,188 @@ st.write("---")
 # Welcome Header Messages
 st.title("Welcome to our Youth Fellowship Portal!")
 st.write(
-    "We are glad you are here! Please take a moment to fill out the form below"
-    " so we can stay connected."
+    "We are glad you are here! Please choose an option below to register or log"
+    " your attendance."
 )
 st.write("---")
 
-# Registration Form Layout
-st.subheader("✝ New Registration Form")
-with st.form("registration_form", clear_on_submit=True):
-  col1, col2 = st.columns(2)
+tab_register, tab_attendance = st.tabs(
+    ["📝 New Member Registration", "✅ Fellowship Attendance Check-In"]
+)
 
-  with col1:
-    full_name = st.text_input("Full Name:", placeholder="e.g., John Doe")
-    birthday = st.date_input(
-        "Birthday:",
-        value=date(2000, 1, 1),
-        min_value=date(1900, 1, 1),
-        max_value=date.today(),
-        format="MM/DD/YYYY",
-    )
-    gender = st.selectbox(
-        "Gender:",
-        ["Male", "Female", "Other"],
-        index=None,
-        placeholder="Select Gender",
-    )
-    membership_status = st.selectbox(
-        "Membership Status:",
-        ["Active Member", "First-Time Visitor"],
-        index=None,
-        placeholder="Select Status",
-    )
-    church = st.selectbox(
-        "Church:",
-        [
-            "Taytay Methodist Church",
-            "Upper Javier Methodist Mission",
-            "Baras Mission Methodist Church",
-            "Halayhayin Peace Methodist Church",
-            "Tanay Methodist Mission",
-            "Higher Ground Methodist Church",
-            "River of Life Methodist Church",
-            "O Mira Gratia Evangelical Brethren Church",
-        ],
-        index=None,
-        placeholder="Select Church",
-    )
+with tab_register:
+  st.subheader("✝ New Registration Form")
+  with st.form("registration_form", clear_on_submit=True):
+    col1, col2 = st.columns(2)
 
-  with col2:
-    parent_name = st.text_input(
-        "Parent's / Guardian's Name:", placeholder="e.g., Mary Doe"
-    )
-    fb_profile = st.text_input(
-        "Facebook Profile Link or Name:", placeholder="e.g., facebook.com/johndoe"
-    )
-
-    contact_number = st.text_input(
-        "Contact Number:",
-        placeholder="09123456789",
-        max_chars=11,
-        help="Must be 11 digits and start with 09 (numbers only)",
-    )
-
-    address = st.text_area(
-        "Complete Address:",
-        height=100,
-        placeholder="e.g., 123 Street Name, Barangay, City",
-    )
-
-  submit_button = st.form_submit_button("Save Registration Details")
-
-  if submit_button:
-    clean_contact = "".join(filter(str.isdigit, contact_number))
-
-    if full_name.strip() == "":
-      st.error("Please enter your **Full Name**.")
-    elif not gender:
-      st.error("Please select your **Gender**.")
-    elif not membership_status:
-      st.error("Please select your **Membership Status**.")
-    elif not church:
-      st.error("Please select your **Church**.")
-    elif parent_name.strip() == "":
-      st.error("Please enter your **Parent's / Guardian's Name**.")
-    elif fb_profile.strip() == "":
-      st.error("Please enter your **Facebook Profile Link or Name**.")
-    elif (
-        not clean_contact.startswith("09") or len(clean_contact) != 11
-    ):
-      st.error(
-          "Please enter a valid **Contact Number** (must be 11 digits and start"
-          " with '09')."
+    with col1:
+      full_name = st.text_input("Full Name:", placeholder="e.g., John Doe")
+      birthday = st.date_input(
+          "Birthday:",
+          value=date(2000, 1, 1),
+          min_value=date(1900, 1, 1),
+          max_value=date.today(),
+          format="MM/DD/YYYY",
       )
-    elif address.strip() == "":
-      st.error("Please enter your **Complete Address**.")
-    else:
-      bday_str = birthday.strftime("%m/%d/%Y") if birthday else ""
-      current_now = datetime.now().strftime("%m/%d/%Y %H:%M:%S")
-
-      formatted_contact = (
-          f"'{clean_contact[:4]}-{clean_contact[4:7]}-{clean_contact[7:]}"
+      gender = st.selectbox(
+          "Gender:",
+          ["Male", "Female", "Other"],
+          index=None,
+          placeholder="Select Gender",
+      )
+      membership_status = st.selectbox(
+          "Membership Status:",
+          ["Active Member", "First-Time Visitor"],
+          index=None,
+          placeholder="Select Status",
+      )
+      church = st.selectbox(
+          "Church:",
+          [
+              "Taytay Methodist Church",
+              "Upper Javier Methodist Mission",
+              "Baras Mission Methodist Church",
+              "Halayhayin Peace Methodist Church",
+              "Tanay Methodist Mission",
+              "Higher Ground Methodist Church",
+              "River of Life Methodist Church",
+              "O Mira Gratia Evangelical Brethren Church",
+          ],
+          index=None,
+          placeholder="Select Church",
       )
 
-      payload = {
-          "action": "register",
-          "fullName": full_name,
-          "birthday": bday_str,
-          "gender": gender,
-          "status": membership_status,
-          "church": church,
-          "parentName": parent_name,
-          "fbProfile": fb_profile,
-          "contactNumber": formatted_contact,
-          "address": address,
-          "registrationDate": current_now,
-      }
+    with col2:
+      parent_name = st.text_input(
+          "Parent's / Guardian's Name:", placeholder="e.g., Mary Doe"
+      )
+      fb_profile = st.text_input(
+          "Facebook Profile Link or Name:",
+          placeholder="e.g., facebook.com/johndoe",
+      )
 
-      try:
-        script_url = st.secrets["SCRIPT_URL"]
-        req = urllib.request.Request(
-            script_url,
-            data=json.dumps(payload).encode("utf-8"),
-            headers={"Content-Type": "application/json"},
-        )
-        urllib.request.urlopen(req)
-        st.success(
-            f"Successfully registered {full_name} directly to the Cloud"
-            " database!"
-        )
-      except Exception as e:
+      contact_number = st.text_input(
+          "Contact Number:",
+          placeholder="09123456789",
+          max_chars=11,
+          help="Must be 11 digits and start with 09 (numbers only)",
+      )
+
+      address = st.text_area(
+          "Complete Address:",
+          height=100,
+          placeholder="e.g., 123 Street Name, Barangay, City",
+      )
+
+    submit_button = st.form_submit_button("Save Registration Details")
+
+    if submit_button:
+      clean_contact = "".join(filter(str.isdigit, contact_number))
+
+      if full_name.strip() == "":
+        st.error("Please enter your **Full Name**.")
+      elif not gender:
+        st.error("Please select your **Gender**.")
+      elif not membership_status:
+        st.error("Please select your **Membership Status**.")
+      elif not church:
+        st.error("Please select your **Church**.")
+      elif parent_name.strip() == "":
+        st.error("Please enter your **Parent's / Guardian's Name**.")
+      elif fb_profile.strip() == "":
+        st.error("Please enter your **Facebook Profile Link or Name**.")
+      elif not clean_contact.startswith("09") or len(clean_contact) != 11:
         st.error(
-            "Details verified locally, but the online database link is pending"
-            " setup."
+            "Please enter a valid **Contact Number** (must be 11 digits and start"
+            " with '09')."
         )
+      elif address.strip() == "":
+        st.error("Please enter your **Complete Address**.")
+      else:
+        bday_str = birthday.strftime("%m/%d/%Y") if birthday else ""
+        current_now = datetime.now().strftime("%m/%d/%Y %H:%M:%S")
+
+        formatted_contact = (
+            f"'{clean_contact[:4]}-{clean_contact[4:7]}-{clean_contact[7:]}"
+        )
+
+        payload = {
+            "action": "register",
+            "fullName": full_name,
+            "birthday": bday_str,
+            "gender": gender,
+            "status": membership_status,
+            "church": church,
+            "parentName": parent_name,
+            "fbProfile": fb_profile,
+            "contactNumber": formatted_contact,
+            "address": address,
+            "registrationDate": current_now,
+        }
+
+        try:
+          script_url = st.secrets["SCRIPT_URL"]
+          req = urllib.request.Request(
+              script_url,
+              data=json.dumps(payload).encode("utf-8"),
+              headers={"Content-Type": "application/json"},
+          )
+          urllib.request.urlopen(req)
+          st.success(
+              f"Successfully registered {full_name} directly to the Cloud"
+              " database!"
+          )
+        except Exception as e:
+          st.error(
+              "Details verified locally, but the online database link is pending"
+              " setup."
+          )
+
+with tab_attendance:
+  st.subheader("📋 Fellowship Attendance Check-In")
+  st.write("Quick check-in: Just type your name and select the date!")
+
+  with st.form("attendance_form", clear_on_submit=True):
+    att_name = st.text_input("Full Name:", placeholder="e.g., John Doe")
+    att_date = st.date_input("Attendance Date:", value=date.today())
+
+    submit_attendance = st.form_submit_button("Check-In")
+
+    if submit_attendance:
+      if att_name.strip() == "":
+        st.error("Please enter your **Full Name**.")
+      else:
+        current_now = datetime.now().strftime("%m/%d/%Y %H:%M:%S")
+        att_date_str = att_date.strftime("%m/%d/%Y")
+
+        payload = {
+            "action": "attendance",
+            "fullName": att_name,
+            "timestamp": current_now,
+            "attendanceDate": att_date_str,
+        }
+
+        try:
+          script_url = st.secrets["SCRIPT_URL"]
+          req = urllib.request.Request(
+              script_url,
+              data=json.dumps(payload).encode("utf-8"),
+              headers={"Content-Type": "application/json"},
+          )
+          urllib.request.urlopen(req)
+          st.success(
+              f"✅ Attendance recorded for **{att_name}** on **{att_date_str}**!"
+          )
+        except Exception as e:
+          st.error(
+              "Details verified locally, but the online database link is pending"
+              " setup."
+          )
 
 st.write("---")
 
 # Sidebar Authentication Controls
-st.sidebar.title("🔐 Admin ")
+st.sidebar.title("🔐 Admin Panel")
 admin_password = st.sidebar.text_input(
     "Enter Password:", type="password", key="final_sidebar_admin_password"
 )
@@ -193,50 +237,55 @@ if admin_password:
   if admin_password == st.secrets["ADMIN_PASSWORD"]:
     st.sidebar.success("Correct Password!")
     st.write("---")
-    st.subheader("Saved Members List (Live Cloud Data Feed)")
+    st.subheader("Admin Control Panel: Live Data Feeds")
 
-    try:
-      raw_url = st.secrets["connections"]["gsheets"]["spreadsheet"]
-      csv_url = get_clean_url(raw_url)
-      df_clean = pd.read_csv(csv_url)
-    except Exception:
-      df_clean = pd.DataFrame()
+    admin_tab1, admin_tab2 = st.tabs(["Database Records", "Attendance Logs"])
 
-    if not df_clean.empty:
-      if "Contact Number" in df_clean.columns:
-        df_clean["Contact Number"] = (
-            df_clean["Contact Number"]
-            .astype(str)
-            .str.replace(r"\.0$", "", regex=True)
-            .str.replace("'", "", regex=False)
+    with admin_tab1:
+      st.subheader("Saved Members List")
+      try:
+        raw_url = st.secrets["connections"]["gsheets"]["spreadsheet"]
+        csv_url = get_clean_url(raw_url)
+        df_clean = pd.read_csv(csv_url)
+      except Exception:
+        df_clean = pd.DataFrame()
+
+      if not df_clean.empty:
+        if "Contact Number" in df_clean.columns:
+          df_clean["Contact Number"] = (
+              df_clean["Contact Number"]
+              .astype(str)
+              .str.replace(r"\.0$", "", regex=True)
+              .str.replace("'", "", regex=False)
+          )
+
+        if "Row No." not in df_clean.columns:
+          df_clean.insert(0, "Row No.", range(1, 1 + len(df_clean)))
+
+        search_query = st.text_input("Search members by name:", value="")
+        if search_query and "Full Name" in df_clean.columns:
+          df_clean = df_clean[
+              df_clean["Full Name"]
+              .astype(str)
+              .str.contains(search_query, case=False, na=False)
+          ]
+
+        st.dataframe(df_clean, use_container_width=True)
+        csv_data = df_clean.to_csv(index=False).encode("utf-8")
+        st.download_button(
+            label="Download Members List as CSV",
+            data=csv_data,
+            file_name=f"registered_members_{date.today().strftime('%m_%d_%Y')}.csv",
+            mime="text/csv",
         )
+      else:
+        st.info("The database is currently loading or empty.")
 
-      if "Row No." not in df_clean.columns:
-        df_clean.insert(0, "Row No.", range(1, 1 + len(df_clean)))
-
-      # Name Search Functionality
-      search_col, empty_space = st.columns(2)
-      with search_col:
-        search_query = st.text_input("Search list by name:", value="")
-
-      if search_query and "Full Name" in df_clean.columns:
-        df_clean = df_clean[
-            df_clean["Full Name"]
-            .astype(str)
-            .str.contains(search_query, case=False, na=False)
-        ]
-
-      st.dataframe(df_clean, use_container_width=True)
-
-      # Excel / CSV Data File Download Exporter
-      csv_data = df_clean.to_csv(index=False).encode("utf-8")
-      st.download_button(
-          label="Download List as Excel / CSV file",
-          data=csv_data,
-          file_name=f"registered_members_{date.today().strftime('%m_%d_%Y')}.csv",
-          mime="text/csv",
+    with admin_tab2:
+      st.subheader("Attendance Logs")
+      st.info(
+          "Note: Attendance logs are recorded directly to your 'ATTENDANCE' tab"
+          " in Google Sheets."
       )
-    else:
-      st.info("The database is currently loading or empty.")
   else:
     st.sidebar.error("Wrong Password")
