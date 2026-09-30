@@ -101,7 +101,6 @@ with st.form("registration_form", clear_on_submit=True):
         "Facebook Profile Link or Name:", placeholder="e.g., facebook.com/johndoe"
     )
 
-    # Single Box Contact Number (Numbers only, 11 digits, starting with 09)
     contact_number = st.text_input(
         "Contact Number:",
         placeholder="09123456789",
