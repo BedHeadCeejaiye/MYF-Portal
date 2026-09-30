@@ -52,7 +52,7 @@ st.write(
 st.write("---")
 
 # Registration Form Layout
-st.subheader("✝️ New Registration Form")
+st.subheader("✝️️ New Registration Form")
 with st.form("registration_form", clear_on_submit=True):
   col1, col2 = st.columns(2)
 
@@ -102,7 +102,7 @@ with st.form("registration_form", clear_on_submit=True):
     )
 
     st.write("Contact Number:")
-    prefix_col, number_col = st.columns([1, 4])
+    prefix_col, number_col = st.columns([0.5, 9.5])
     with prefix_col:
       st.text_input(
           "Prefix", value="09", disabled=True, label_visibility="collapsed"
@@ -125,7 +125,9 @@ with st.form("registration_form", clear_on_submit=True):
 
   # Form Submission Handler
   if submit_button:
-    full_contact_number = "09" + contact_suffix.strip()
+    # Filter suffix to numbers only
+    clean_suffix = "".join(filter(str.isdigit, contact_suffix))
+    full_contact_number = "09" + clean_suffix
 
     if (
         full_name.strip() == ""
@@ -134,8 +136,7 @@ with st.form("registration_form", clear_on_submit=True):
         or not church
         or parent_name.strip() == ""
         or fb_profile.strip() == ""
-        or len(contact_suffix.strip()) != 9
-        or not contact_suffix.strip().isdigit()
+        or len(clean_suffix) != 9
         or address.strip() == ""
     ):
       st.error(
@@ -145,6 +146,7 @@ with st.form("registration_form", clear_on_submit=True):
     else:
       bday_str = birthday.strftime("%m/%d/%Y") if birthday else ""
       current_now = datetime.now().strftime("%m/%d/%Y %H:%M:%S")
+
       formatted_contact = f"'{full_contact_number}"
 
       payload = {
