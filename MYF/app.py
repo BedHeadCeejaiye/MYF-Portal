@@ -194,6 +194,7 @@ with tab_register:
 
 with tab_attendance:
     st.subheader("Attendance Check-In")
+    st.write("Quick check-in: Just type your name and select the date!")
 
     with st.form("attendance_form", clear_on_submit=True):
         col_att, _ = st.columns([1, 2])
@@ -224,10 +225,19 @@ with tab_attendance:
                         data=json.dumps(payload).encode("utf-8"),
                         headers={"Content-Type": "application/json"},
                     )
-                    urllib.request.urlopen(req)
-                    st.success(
-                        f"✅ Attendance recorded for **{att_name}** at **{attendance_value}**!"
-                    )
+                    response = urllib.request.urlopen(req)
+                    res_data = json.loads(response.read().decode("utf-8"))
+
+                    if res_data.get("status") == "duplicate":
+                        st.warning(
+                            f"⚠️ **{att_name}** has already checked in for"
+                            f" **{att_date_str}**!"
+                        )
+                    else:
+                        st.success(
+                            f"✅ Attendance recorded for **{att_name}** at"
+                            f" **{attendance_value}**!"
+                        )
                 except Exception as e:
                     st.error(
                         "Details verified locally, but the online database link is pending"
