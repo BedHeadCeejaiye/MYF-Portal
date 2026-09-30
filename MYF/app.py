@@ -295,13 +295,24 @@ if admin_password:
         df_att = pd.DataFrame()
 
       if not df_att.empty:
+        # Clean up column names so merged/unnamed date columns look nice
+        new_columns = []
+        date_count = 1
+        for col in df_att.columns:
+          if "Unnamed" in str(col) or col == "Date":
+            new_columns.append(f"Date {date_count}")
+            date_count += 1
+          else:
+            new_columns.append(col)
+        df_att.columns = new_columns
+
         if "Row No." not in df_att.columns:
           df_att.insert(0, "Row No.", range(1, 1 + len(df_att)))
 
         search_att = st.text_input("Search attendance by name:", value="")
-        if search_att and "Full Name" in df_att.columns:
+        if search_att and "Full name" in df_att.columns:
           df_att = df_att[
-              df_att["Full Name"]
+              df_att["Full name"]
               .astype(str)
               .str.contains(search_att, case=False, na=False)
           ]
@@ -315,6 +326,6 @@ if admin_password:
             mime="text/csv",
         )
       else:
-        st.info("No attendance logs recorded yet or GID is pending.")
+        st.info("No attendance logs recorded yet.")
   else:
     st.sidebar.error("Wrong Password")
