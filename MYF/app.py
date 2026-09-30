@@ -69,22 +69,6 @@ with tab_register:
                 max_value=date.today(),
                 format="MM/DD/YYYY",
             )
-            
-            today = date.today()
-            calculated_age = (
-                today.year
-                - birthday.year
-                - ((today.month, today.day) < (birthday.month, birthday.day))
-            )
-            
-            age = st.number_input(
-                "Age:",
-                min_value=0,
-                max_value=120,
-                value=int(calculated_age) if calculated_age >= 0 else 0,
-                step=1,
-            )
-
             gender = st.selectbox(
                 "Gender:",
                 ["Male", "Female", "Other"],
@@ -171,7 +155,6 @@ with tab_register:
                     "action": "register",
                     "fullName": full_name,
                     "birthday": bday_str,
-                    "age": age,
                     "gender": gender,
                     "status": membership_status,
                     "church": church,
@@ -202,11 +185,10 @@ with tab_register:
 
 with tab_attendance:
     st.subheader("Attendance Check-In")
-    st.write("Quick check-in: Just type your name, age, and select the date!")
+    st.write("Quick check-in: Just type your name and select the date!")
 
     with st.form("attendance_form", clear_on_submit=True):
         att_name = st.text_input("Full Name:", placeholder="e.g., John Doe")
-        att_age = st.number_input("Age:", min_value=0, max_value=120, value=18, step=1)
         att_date = st.date_input("Attendance Date:", value=date.today())
 
         submit_attendance = st.form_submit_button("Check-In")
@@ -221,7 +203,6 @@ with tab_attendance:
                 payload = {
                     "action": "attendance",
                     "fullName": att_name,
-                    "age": att_age,
                     "timestamp": current_now,
                     "attendanceDate": att_date_str,
                 }
@@ -235,7 +216,7 @@ with tab_attendance:
                     )
                     urllib.request.urlopen(req)
                     st.success(
-                        f"✅ Attendance recorded for **{att_name}** (Age: {att_age}) on **{att_date_str}**!"
+                        f"✅ Attendance recorded for **{att_name}** on **{att_date_str}**!"
                     )
                 except Exception as e:
                     st.error(
