@@ -116,7 +116,6 @@ with st.form("registration_form", clear_on_submit=True):
 
   submit_button = st.form_submit_button("Save Registration Details")
 
-  # Form Submission Handler with Specific Field Validation
   if submit_button:
     clean_contact = "".join(filter(str.isdigit, contact_number))
 
