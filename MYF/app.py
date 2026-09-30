@@ -13,6 +13,7 @@ def get_clean_url(url_string):
     return url_string.split("/edit")[0] + "/export?format=csv"
   return url_string
 
+
 # Daily Bible Verse Setup
 verses_list = [
     (
@@ -282,9 +283,38 @@ if admin_password:
 
     with admin_tab2:
       st.subheader("Attendance Logs")
-      st.info(
-          "Note: Attendance logs are recorded directly to your 'ATTENDANCE' tab"
-          " in Google Sheets."
-      )
+      try:
+        raw_url = st.secrets["connections"]["gsheets"]["spreadsheet"]
+        base_csv_url = get_clean_url(raw_url)
+        attendance_csv_url = (
+            base_csv_url.split("export?format=csv")[0]
+            + "export?format=csv&gid=#gid=1206935683"
+        )
+        df_att = pd.read_csv(attendance_csv_url)
+      except Exception:
+        df_att = pd.DataFrame()
+
+      if not df_att.empty:
+        if "Row No." not in df_att.columns:
+          df_att.insert(0, "Row No.", range(1, 1 + len(df_att)))
+
+        search_att = st.text_input("Search attendance by name:", value="")
+        if search_att and "Full Name" in df_att.columns:
+          df_att = df_att[
+              df_att["Full Name"]
+              .astype(str)
+              .str.contains(search_att, case=False, na=False)
+          ]
+
+        st.dataframe(df_att, use_container_width=True)
+        att_csv_data = df_att.to_csv(index=False).encode("utf-8")
+        st.download_button(
+            label="Download Attendance Logs as CSV",
+            data=att_csv_data,
+            file_name=f"attendance_logs_{date.today().strftime('%m_%d_%Y')}.csv",
+            mime="text/csv",
+        )
+      else:
+        st.info("No attendance logs recorded yet or GID is pending.")
   else:
     st.sidebar.error("Wrong Password")
