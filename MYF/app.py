@@ -262,7 +262,12 @@ if admin_password:
                 if "Row No." not in df_clean.columns:
                     df_clean.insert(0, "Row No.", range(1, 1 + len(df_clean)))
 
-                search_query = st.text_input("Search members by name:", value="")
+                col_s1, _ = st.columns([1, 2])
+                with col_s1:
+                    search_query = st.text_input(
+                        "Search members by name:", value=""
+                    )
+
                 if search_query and "Full Name" in df_clean.columns:
                     df_clean = df_clean[
                         df_clean["Full Name"]
@@ -311,7 +316,12 @@ if admin_password:
                         date_idx += 1
                 df_att.columns = new_columns
 
-                search_att = st.text_input("Search attendance by name:", value="")
+                col_s2, _ = st.columns([1, 2])
+                with col_s2:
+                    search_att = st.text_input(
+                        "Search attendance by name:", value=""
+                    )
+
                 if search_att and "Full name" in df_att.columns:
                     df_att = df_att[
                         df_att["Full name"]
