@@ -52,7 +52,7 @@ st.write(
 st.write("---")
 
 # Registration Form Layout
-st.subheader("✝️️ New Registration Form")
+st.subheader("✝ New Registration Form")
 with st.form("registration_form", clear_on_submit=True):
   col1, col2 = st.columns(2)
 
@@ -101,19 +101,12 @@ with st.form("registration_form", clear_on_submit=True):
         "Facebook Profile Link or Name:", placeholder="e.g., facebook.com/johndoe"
     )
 
-    st.write("Contact Number:")
-    prefix_col, number_col = st.columns([1.2, 8.8])
-    with prefix_col:
-      st.text_input(
-          "Prefix", value="09", disabled=True, label_visibility="collapsed"
-      )
-    with number_col:
-      contact_suffix = st.text_input(
-          "Contact Suffix",
-          placeholder="123456789",
-          max_chars=9,
-          label_visibility="collapsed",
-      )
+    contact_suffix = st.text_input(
+        "Contact Number (Starts with 09):",
+        placeholder="123456789",
+        max_chars=9,
+        help="Type the 9 digits after 09",
+    )
 
     address = st.text_area(
         "Complete Address:",
@@ -125,7 +118,6 @@ with st.form("registration_form", clear_on_submit=True):
 
   # Form Submission Handler
   if submit_button:
-    # Filter suffix to numbers only
     clean_suffix = "".join(filter(str.isdigit, contact_suffix))
     full_contact_number = "09" + clean_suffix
 
@@ -140,8 +132,8 @@ with st.form("registration_form", clear_on_submit=True):
         or address.strip() == ""
     ):
       st.error(
-          "All fields are required, and the contact number must be exactly 9"
-          " digits after '09'!"
+          "All fields are required, and the contact number suffix must be"
+          " exactly 9 digits!"
       )
     else:
       bday_str = birthday.strftime("%m/%d/%Y") if birthday else ""
