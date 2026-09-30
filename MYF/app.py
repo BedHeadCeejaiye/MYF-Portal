@@ -101,11 +101,12 @@ with st.form("registration_form", clear_on_submit=True):
         "Facebook Profile Link or Name:", placeholder="e.g., facebook.com/johndoe"
     )
 
-    contact_suffix = st.text_input(
-        "Contact Number (Starts with 09):",
-        placeholder="123456789",
-        max_chars=9,
-        help="Type the 9 digits after 09",
+    # Single Box Contact Number (Numbers only, 11 digits, starting with 09)
+    contact_number = st.text_input(
+        "Contact Number:",
+        placeholder="09123456789",
+        max_chars=11,
+        help="Must be 11 digits and start with 09 (numbers only)",
     )
 
     address = st.text_area(
@@ -118,8 +119,7 @@ with st.form("registration_form", clear_on_submit=True):
 
   # Form Submission Handler
   if submit_button:
-    clean_suffix = "".join(filter(str.isdigit, contact_suffix))
-    full_contact_number = "09" + clean_suffix
+    clean_contact = "".join(filter(str.isdigit, contact_number))
 
     if (
         full_name.strip() == ""
@@ -128,18 +128,19 @@ with st.form("registration_form", clear_on_submit=True):
         or not church
         or parent_name.strip() == ""
         or fb_profile.strip() == ""
-        or len(clean_suffix) != 9
         or address.strip() == ""
+        or not clean_contact.startswith("09")
+        or len(clean_contact) != 11
     ):
       st.error(
-          "All fields are required, and the contact number suffix must be"
-          " exactly 9 digits!"
+          "All fields are required, and the contact number must be a valid"
+          " 11-digit number starting with '09' (numbers only)!"
       )
     else:
       bday_str = birthday.strftime("%m/%d/%Y") if birthday else ""
       current_now = datetime.now().strftime("%m/%d/%Y %H:%M:%S")
 
-      formatted_contact = f"'{full_contact_number}"
+      formatted_contact = f"'{clean_contact}"
 
       payload = {
           "action": "register",
