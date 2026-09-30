@@ -1,6 +1,6 @@
+from datetime import date, datetime
 import json
 import urllib.request
-from datetime import date, datetime
 import pandas as pd
 import streamlit as st
 
@@ -57,34 +57,46 @@ with st.form("registration_form", clear_on_submit=True):
   col1, col2 = st.columns(2)
 
   with col1:
-    full_name = st.text_input("Full Name:", placeholder="e.g., John Doe")
+    full_name = st.text_input("Full Name *:", placeholder="e.g., John Doe")
     birthday = st.date_input(
-        "Birthday:",
+        "Birthday *:",
         value=date(2000, 1, 1),
         min_value=date(1900, 1, 1),
         max_value=date.today(),
         format="MM/DD/YYYY",
     )
-    gender = st.selectbox("Gender:", ["Male", "Female", "Other"])
+    gender = st.selectbox("Gender *:", ["Select Gender", "Male", "Female", "Other"])
     membership_status = st.selectbox(
-        "Membership Status:", ["Active Member", "First-Time Visitor"]
+        "Membership Status *:",
+        ["Select Status", "Active Member", "First-Time Visitor"],
     )
-    church = st.text_input(
-        "Church:", placeholder="e.g., Taytay Methodist Church"
+    church = st.selectbox(
+        "Church *:",
+        [
+            "Select Church",
+            "Taytay Methodist Church",
+            "Upper Javier Methodist Mission",
+            "Baras Mission Methodist Church",
+            "Halayhayin Peace Methodist Church",
+            "Tanay Methodist Mission",
+            "Higher Ground Methodist Church", 
+            "River of Life Methodist Church",
+            "O Mira Gratia Evangelical Brethren Church",
+        ],
     )
 
   with col2:
     parent_name = st.text_input(
-        "Parent's / Guardian's Name:", placeholder="e.g., Mary Doe"
+        "Parent's / Guardian's Name *:", placeholder="e.g., Mary Doe"
     )
     fb_profile = st.text_input(
-        "Facebook Profile Link or Name:", placeholder="e.g., ://facebook.com"
+        "Facebook Profile Link or Name *:", placeholder="e.g., facebook.com/johndoe"
     )
     contact_number = st.text_input(
-        "Contact Number:", placeholder="e.g., 09123456789"
+        "Contact Number *:", placeholder="e.g., 09123456789"
     )
     address = st.text_area(
-        "Complete Address:",
+        "Complete Address *:",
         height=100,
         placeholder="e.g., 123 Street Name, Barangay, City",
     )
@@ -93,8 +105,17 @@ with st.form("registration_form", clear_on_submit=True):
 
   # Form Submission Handler
   if submit_button:
-    if full_name.strip() == "":
-      st.error("Full Name is a required field!")
+    if (
+        full_name.strip() == ""
+        or gender == "Select Gender"
+        or membership_status == "Select Status"
+        or church == "Select Church"
+        or parent_name.strip() == ""
+        or fb_profile.strip() == ""
+        or contact_number.strip() == ""
+        or address.strip() == ""
+    ):
+      st.error("All fields are required! Please complete the form.")
     else:
       bday_str = birthday.strftime("%m/%d/%Y") if birthday else ""
       current_now = datetime.now().strftime("%m/%d/%Y %H:%M:%S")
@@ -139,9 +160,6 @@ admin_password = st.sidebar.text_input(
     "Enter Password:", type="password", key="final_sidebar_admin_password"
 )
 
-if "selected_remove_row" not in st.session_state:
-  st.session_state.selected_remove_row = None
-
 # Admin Panel Access Verification
 if admin_password:
   if admin_password == st.secrets["ADMIN_PASSWORD"]:
@@ -179,87 +197,10 @@ if admin_password:
             .str.contains(search_query, case=False, na=False)
         ]
 
-      df_clean["Remove"] = False
-      if (
-          st.session_state.selected_remove_row is not None
-          and st.session_state.selected_remove_row in df_clean.index
-      ):
-        df_clean.loc[st.session_state.selected_remove_row, "Remove"] = True
-
-      edited_df = st.data_editor(
-          df_clean,
-          use_container_width=False,
-          disabled=[col for col in df_clean.columns if col != "Remove"],
-          column_config={
-              "Contact Number": st.column_config.TextColumn("Contact Number"),
-              "Remove": st.column_config.CheckboxColumn(
-                  "Remove",
-                  help=(
-                      "Check this box to prepare row for cloud deletion (only"
-                      " one allowed)"
-                  ),
-                  default=False,
-              ),
-          },
-          key="member_editor",
-      )
-
-      currently_true_rows = edited_df[edited_df["Remove"] == True].index.tolist()
-      new_selection = None
-      if currently_true_rows:
-        for r_idx in currently_true_rows:
-          if r_idx != st.session_state.selected_remove_row:
-            new_selection = r_idx
-            break
-        if new_selection is None:
-          new_selection = currently_true_rows[0]
-
-      if new_selection != st.session_state.selected_remove_row:
-        st.session_state.selected_remove_row = new_selection
-        st.rerun()
-
-      # Deletion Panel Handler
-      marked_rows = edited_df[edited_df["Remove"] == True]
-      if not marked_rows.empty:
-        for idx, row in marked_rows.iterrows():
-          target_name = row["Full Name"]
-
-          box_col, alignment_col = st.columns(2)
-          with box_col:
-            st.error(f"Do you really want to remove {target_name}?")
-
-            btn_col1, btn_col2, btn_spacer = st.columns(3)
-            with btn_col1:
-              if st.button("Yes", key=f"yes_cloud_{idx}"):
-                delete_payload = {"action": "delete", "fullName": target_name}
-                try:
-                  script_url = st.secrets["SCRIPT_URL"]
-                  req = urllib.request.Request(
-                      script_url,
-                      data=json.dumps(delete_payload).encode("utf-8"),
-                      headers={"Content-Type": "application/json"},
-                  )
-                  urllib.request.urlopen(req)
-                  if "member_editor" in st.session_state:
-                    del st.session_state["member_editor"]
-                  st.session_state.selected_remove_row = None
-                  st.rerun()
-                except Exception:
-                  st.warning(
-                      "Request processed locally, database synchronization"
-                      " pending."
-                  )
-            with btn_col2:
-              if st.button("No", key=f"no_cloud_{idx}"):
-                if "member_editor" in st.session_state:
-                  del st.session_state["member_editor"]
-                st.session_state.selected_remove_row = None
-                st.rerun()
+      st.dataframe(df_clean, use_container_width=True)
 
       # Excel / CSV Data File Download Exporter
-      csv_data = (
-          df_clean.drop(columns=["Remove"]).to_csv(index=False).encode("utf-8")
-      )
+      csv_data = df_clean.to_csv(index=False).encode("utf-8")
       st.download_button(
           label="Download List as Excel / CSV file",
           data=csv_data,
