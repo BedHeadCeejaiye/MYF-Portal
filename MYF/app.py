@@ -282,52 +282,52 @@ if admin_password:
         st.info("The database is currently loading or empty.")
 
    with admin_tab2:
-      st.subheader("Attendance Logs")
-      try:
-        raw_url = st.secrets["connections"]["gsheets"]["spreadsheet"]
-        base_csv_url = get_clean_url(raw_url)
-        attendance_csv_url = (
-            base_csv_url.split("export?format=csv")[0]
-            + "export?format=csv&gid=1206935683"
-        )
-        df_att = pd.read_csv(attendance_csv_url)
-      except Exception:
-        df_att = pd.DataFrame()
+        st.subheader("Attendance Logs")
+        try:
+            raw_url = st.secrets["connections"]["gsheets"]["spreadsheet"]
+            base_csv_url = get_clean_url(raw_url)
+            attendance_csv_url = (
+                base_csv_url.split("export?format=csv")[0]
+                + "export?format=csv&gid=1206935683"
+            )
+            df_att = pd.read_csv(attendance_csv_url)
+        except Exception:
+            df_att = pd.DataFrame()
 
-      if not df_att.empty:
-        if "Row No." not in df_att.columns:
-          df_att.insert(0, "Row No.", range(1, 1 + len(df_att)))
+        if not df_att.empty:
+            if "Row No." not in df_att.columns:
+                df_att.insert(0, "Row No.", range(1, 1 + len(df_att)))
 
-        new_columns = []
-        date_idx = 0
-        for col in df_att.columns:
-          if col in ["Row No.", "Full name", "Time stamp"]:
-            new_columns.append(col)
-          else:
-            if date_idx == 0:
-              new_columns.append("Date")
-            else:
-              new_columns.append(" " * date_idx)
-            date_idx += 1
-        df_att.columns = new_columns
+            new_columns = []
+            date_idx = 0
+            for col in df_att.columns:
+                if col in ["Row No.", "Full name", "Time stamp"]:
+                    new_columns.append(col)
+                else:
+                    if date_idx == 0:
+                        new_columns.append("Date")
+                    else:
+                        new_columns.append(" " * date_idx)
+                    date_idx += 1
+            df_att.columns = new_columns
 
-        search_att = st.text_input("Search attendance by name:", value="")
-        if search_att and "Full name" in df_att.columns:
-          df_att = df_att[
-              df_att["Full name"]
-              .astype(str)
-              .str.contains(search_att, case=False, na=False)
-          ]
+            search_att = st.text_input("Search attendance by name:", value="")
+            if search_att and "Full name" in df_att.columns:
+                df_att = df_att[
+                    df_att["Full name"]
+                    .astype(str)
+                    .str.contains(search_att, case=False, na=False)
+                ]
 
-        st.dataframe(df_att, use_container_width=False)
-        att_csv_data = df_att.to_csv(index=False).encode("utf-8")
-        st.download_button(
-            label="Download Attendance Logs as CSV",
-            data=att_csv_data,
-            file_name=f"attendance_logs_{date.today().strftime('%m_%d_%Y')}.csv",
-            mime="text/csv",
-        )
-      else:
-        st.info("No attendance logs recorded yet.")
+            st.dataframe(df_att, use_container_width=False)
+            att_csv_data = df_att.to_csv(index=False).encode("utf-8")
+            st.download_button(
+                label="Download Attendance Logs as CSV",
+                data=att_csv_data,
+                file_name=f"attendance_logs_{date.today().strftime('%m_%d_%Y')}.csv",
+                mime="text/csv",
+            )
+        else:
+            st.info("No attendance logs recorded yet.")
   else:
     st.sidebar.error("Wrong Password")
