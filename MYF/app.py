@@ -55,7 +55,7 @@ tab_register, tab_attendance = st.tabs(
 )
 
 with tab_register:
-  st.subheader("✝️ New Registration Form")
+  st.subheader("✝ New Registration Form")
   with st.form("registration_form", clear_on_submit=True):
     col1, col2 = st.columns(2)
 
