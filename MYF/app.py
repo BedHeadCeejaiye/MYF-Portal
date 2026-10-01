@@ -138,8 +138,7 @@ with tab_register:
                 st.error("Please enter your **Facebook Profile Link or Name**.")
             elif not clean_contact.startswith("09") or len(clean_contact) != 11:
                 st.error(
-                    "Please enter a valid **Contact Number** (must be 11 digits and start"
-                    " with '09')."
+                    "Please enter a valid **Contact Number**"
                 )
             elif address.strip() == "":
                 st.error("Please enter your **Complete Address**.")
@@ -201,7 +200,6 @@ with tab_register:
 
 with tab_attendance:
     st.subheader("Attendance Check-In")
-    st.write("Quick check-in: Just type your name and select the date!")
 
     with st.form("attendance_form", clear_on_submit=True):
         col_att, _ = st.columns([1, 2])
@@ -306,7 +304,7 @@ if admin_password:
                     column_configs["Profile Picture"] = st.column_config.ImageColumn(
                         "Profile Picture",
                         help="Member profile photo",
-                        width="small"
+                        width="medium"  # Updated to medium size
                     )
 
                 st.dataframe(
