@@ -12,6 +12,15 @@ def get_clean_url(url_string):
         return url_string.split("/edit")[0] + "/export?format=csv"
     return url_string
 
+st.markdown(
+    """
+    <div style="background-color: #f8f9fa; padding: 20px; border-radius: 10px; border-left: 5px solid #ff4b4b; margin-bottom: 25px;">
+        <h2 style="color: #31333F; margin: 0 0 5px 0;">👋 Hello, Kabataan!</h2>
+        <p style="color: #6c757d; font-size: 1.05rem; margin: 0;">Welcome to the Youth Fellowship Portal. Register for events and check-in easily below!</p>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 # Daily Bible Verse Setup
 verses_list = [
     (
