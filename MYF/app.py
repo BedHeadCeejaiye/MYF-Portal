@@ -319,7 +319,7 @@ if admin_password:
                             st.write(f"**FB:** {row_data.get('Facebook Profile', 'N/A')}  |  **Registered:** {row_data.get('Registration Date', 'N/A')}")
 
                 st.write("---")
-                st.subheader("📋 Full Database Table Summary")
+                st.subheader("Members list")
                 
                 column_configs = {}
                 if "Profile Picture" in df_clean.columns:
