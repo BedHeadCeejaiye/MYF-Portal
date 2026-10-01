@@ -286,7 +286,8 @@ if admin_password:
                 if "Row No." not in df_clean.columns:
                     df_clean.insert(0, "Row No.", range(1, 1 + len(df_clean)))
 
-                st.markdown("### 👤 Member Profile Inspector")
+
+                st.markdown("Profile")
                 member_names = df_clean["Full Name"].tolist() if "Full Name" in df_clean.columns else []
                 
                 if member_names:
@@ -300,7 +301,7 @@ if admin_password:
                         row_data = selected_row.iloc[0]
                         
                         st.write("")
-                        col_img, col_info = st.columns([1.2, 2.2], gap="large")
+                        col_img, col_info = st.columns([1, 2], gap="small")
                         
                         with col_img:
                             img_url = row_data.get("Profile Picture", None)
@@ -311,11 +312,11 @@ if admin_password:
                                 
                         with col_info:
                             st.markdown(f"### {row_data.get('Full Name', 'N/A')}")
-                            st.write(f"🏷️ **Status:** {row_data.get('Membership Status', 'N/A')}  |  ⛪ **Church:** {row_data.get('Church', 'N/A')}")
-                            st.write(f"🎂 **Birthday:** {row_data.get('Birthday', 'N/A')} ({row_data.get('Age', 'N/A')} yrs)  |  ⚥ **Gender:** {row_data.get('Gender', 'N/A')}")
-                            st.write(f"📞 **Contact:** {row_data.get('Contact Number', 'N/A')}  |  👤 **Guardian:** {row_data.get('Parent/Guardian Name', 'N/A')}")
-                            st.write(f"📍 **Address:** {row_data.get('Address', 'N/A')}")
-                            st.write(f"🌐 **FB:** {row_data.get('Facebook Profile', 'N/A')}  |  🕒 **Registered:** {row_data.get('Registration Date', 'N/A')}")
+                            st.write(f"**Status:** {row_data.get('Membership Status', 'N/A')}  |  **Church:** {row_data.get('Church', 'N/A')}")
+                            st.write(f"**Birthday:** {row_data.get('Birthday', 'N/A')} ({row_data.get('Age', 'N/A')} yrs)  |  **Gender:** {row_data.get('Gender', 'N/A')}")
+                            st.write(f"**Contact:** {row_data.get('Contact Number', 'N/A')}  |  **Guardian:** {row_data.get('Parent/Guardian Name', 'N/A')}")
+                            st.write(f"**Address:** {row_data.get('Address', 'N/A')}")
+                            st.write(f"**FB:** {row_data.get('Facebook Profile', 'N/A')}  |  **Registered:** {row_data.get('Registration Date', 'N/A')}")
 
                 st.write("---")
                 st.subheader("📋 Full Database Table Summary")
