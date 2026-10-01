@@ -44,7 +44,6 @@ st.write("---")
 
 # Welcome Header Messages
 st.title("Hello, Kabataan!")
-)
 st.write("---")
 
 tab_register, tab_attendance = st.tabs(
