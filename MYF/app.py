@@ -1,4 +1,5 @@
 from datetime import date, datetime
+import base64
 import json
 import urllib.request
 import pandas as pd
@@ -94,6 +95,8 @@ with tab_register:
                     index=None,
                     placeholder="Select Church",
                 )
+                
+                profile_image = st.file_uploader("Upload Profile Picture:", type=["jpg", "jpeg", "png"])
 
             with col2:
                 parent_name = st.text_input(
@@ -155,6 +158,12 @@ with tab_register:
                     f"'{clean_contact[:4]}-{clean_contact[4:7]}-{clean_contact[7:]}"
                 )
 
+                image_base64 = ""
+                image_name = ""
+                if profile_image is not None:
+                    image_base64 = base64.b64encode(profile_image.read()).decode("utf-8")
+                    image_name = profile_image.name
+
                 payload = {
                     "action": "register",
                     "fullName": full_name,
@@ -168,6 +177,8 @@ with tab_register:
                     "contactNumber": formatted_contact,
                     "address": address,
                     "registrationDate": current_now,
+                    "imageBase64": image_base64,
+                    "imageName": image_name,
                 }
 
                 try:
@@ -290,7 +301,20 @@ if admin_password:
                         .str.contains(search_query, case=False, na=False)
                     ]
 
-                st.dataframe(df_clean, use_container_width=False)
+                column_configs = {}
+                if "Profile Picture" in df_clean.columns:
+                    column_configs["Profile Picture"] = st.column_config.ImageColumn(
+                        "Profile Picture",
+                        help="Member profile photo",
+                        width="small"
+                    )
+
+                st.dataframe(
+                    df_clean,
+                    use_container_width=False,
+                    column_config=column_configs
+                )
+
                 csv_data = df_clean.to_csv(index=False).encode("utf-8")
                 st.download_button(
                     label="Download List as Excel/CSV file",
@@ -318,7 +342,6 @@ if admin_password:
                 if "Row No." not in df_att.columns:
                     df_att.insert(0, "Row No.", range(1, 1 + len(df_att)))
 
-                # Ensure 100% unique column names for PyArrow
                 new_columns = []
                 date_count = 0
                 for col in df_att.columns:
