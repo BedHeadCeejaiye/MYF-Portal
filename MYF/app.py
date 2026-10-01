@@ -290,35 +290,32 @@ if admin_password:
                 member_names = df_clean["Full Name"].tolist() if "Full Name" in df_clean.columns else []
                 
                 if member_names:
-                    selected_member_name = st.selectbox("Select a member to view complete profile details and photo:", member_names)
+                    col_sel, _ = st.columns([1, 2])
+                    with col_sel:
+                        selected_member_name = st.selectbox("Select a member:", member_names)
+                        
                     selected_row = df_clean[df_clean["Full Name"] == selected_member_name]
                     
                     if not selected_row.empty:
                         row_data = selected_row.iloc[0]
                         
                         st.write("")
-                        col_img, col_info = st.columns([1, 2.5], gap="medium")
+                        col_img, col_info = st.columns([1.2, 2.2], gap="large")
                         
                         with col_img:
                             img_url = row_data.get("Profile Picture", None)
                             if pd.notna(img_url) and str(img_url).startswith("http"):
-                                st.image(img_url, caption=f"{selected_member_name}", width=260)
+                                st.image(img_url, caption=f"{selected_member_name}", width=340)
                             else:
-                                st.info("No profile picture uploaded for this member.")
+                                st.info("No profile picture uploaded.")
                                 
                         with col_info:
-                            st.markdown(f"#### 📄 Personal Information")
-                            st.write(f"**Full Name:** {row_data.get('Full Name', 'N/A')}")
-                            st.write(f"**Birthday:** {row_data.get('Birthday', 'N/A')} | **Age:** {row_data.get('Age', 'N/A')} | **Gender:** {row_data.get('Gender', 'N/A')}")
-                            st.write(f"**Membership Status:** {row_data.get('Membership Status', 'N/A')}")
-                            st.write(f"**Church:** {row_data.get('Church', 'N/A')}")
-                            
-                            st.markdown(f"#### 📞 Contact & Family")
-                            st.write(f"**Parent / Guardian:** {row_data.get('Parent/Guardian Name', 'N/A')}")
-                            st.write(f"**Contact Number:** {row_data.get('Contact Number', 'N/A')}")
-                            st.write(f"**Facebook Profile:** {row_data.get('Facebook Profile', 'N/A')}")
-                            st.write(f"**Address:** {row_data.get('Address', 'N/A')}")
-                            st.write(f"**Registration Date:** {row_data.get('Registration Date', 'N/A')}")
+                            st.markdown(f"### {row_data.get('Full Name', 'N/A')}")
+                            st.write(f"🏷️ **Status:** {row_data.get('Membership Status', 'N/A')}  |  ⛪ **Church:** {row_data.get('Church', 'N/A')}")
+                            st.write(f"🎂 **Birthday:** {row_data.get('Birthday', 'N/A')} ({row_data.get('Age', 'N/A')} yrs)  |  ⚥ **Gender:** {row_data.get('Gender', 'N/A')}")
+                            st.write(f"📞 **Contact:** {row_data.get('Contact Number', 'N/A')}  |  👤 **Guardian:** {row_data.get('Parent/Guardian Name', 'N/A')}")
+                            st.write(f"📍 **Address:** {row_data.get('Address', 'N/A')}")
+                            st.write(f"🌐 **FB:** {row_data.get('Facebook Profile', 'N/A')}  |  🕒 **Registered:** {row_data.get('Registration Date', 'N/A')}")
 
                 st.write("---")
                 st.subheader("📋 Full Database Table Summary")
