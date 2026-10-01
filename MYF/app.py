@@ -12,7 +12,6 @@ def get_clean_url(url_string):
         return url_string.split("/edit")[0] + "/export?format=csv"
     return url_string
     
-)
 # Daily Bible Verse Setup
 verses_list = [
     (
