@@ -266,7 +266,6 @@ if admin_password:
         admin_tab1, admin_tab2 = st.tabs(["Database Records", "Attendance Logs"])
 
         with admin_tab1:
-            st.subheader("Saved Members Directory")
             try:
                 raw_url = st.secrets["connections"]["gsheets"]["spreadsheet"]
                 csv_url = get_clean_url(raw_url)
@@ -286,7 +285,6 @@ if admin_password:
                 if "Row No." not in df_clean.columns:
                     df_clean.insert(0, "Row No.", range(1, 1 + len(df_clean)))
 
-                st.markdown("Member Profile")
                 member_names = df_clean["Full Name"].tolist() if "Full Name" in df_clean.columns else []
                 
                 if member_names:
@@ -296,7 +294,7 @@ if admin_password:
                             "Search member name:",
                             member_names,
                             index=None,
-                            placeholder="Type or select a member..."
+                            placeholder="Select a member..."
                         )
                         
                     if selected_member_name:
