@@ -124,82 +124,80 @@ with tab_register:
 
             submit_button = st.form_submit_button("Save Registration Details")
 
-        if submit_button:
-            clean_contact = "".join(filter(str.isdigit, contact_number))
+            if submit_button:
+                clean_contact = "".join(filter(str.isdigit, contact_number))
 
-            if full_name.strip() == "":
-                st.error("Please enter your **Full Name**.")
-            elif not gender:
-                st.error("Please select your **Gender**.")
-            elif not membership_status:
-                st.error("Please select your **Membership Status**.")
-            elif not church:
-                st.error("Please select your **Church**.")
-            elif parent_name.strip() == "":
-                st.error("Please enter your **Parent's / Guardian's Name**.")
-            elif fb_profile.strip() == "":
-                st.error("Please enter your **Facebook Profile Link or Name**.")
-            elif not clean_contact.startswith("09") or len(clean_contact) != 11:
-                st.error(
-                    "Please enter a valid **Contact Number**"
-                )
-            elif address.strip() == "":
-                st.error("Please enter your **Complete Address**.")
-            else:
-                today = date.today()
-                computed_age = (
-                    today.year
-                    - birthday.year
-                    - ((today.month, today.day) < (birthday.month, birthday.day))
-                )
-
-                bday_str = birthday.strftime("%m/%d/%Y") if birthday else ""
-                current_now = datetime.now().strftime("%m/%d/%Y %H:%M:%S")
-
-                formatted_contact = (
-                    f"'{clean_contact[:4]}-{clean_contact[4:7]}-{clean_contact[7:]}"
-                )
-
-                image_base64 = ""
-                image_name = ""
-                if profile_image is not None:
-                    image_base64 = base64.b64encode(profile_image.read()).decode("utf-8")
-                    image_name = profile_image.name
-
-                payload = {
-                    "action": "register",
-                    "fullName": full_name,
-                    "birthday": bday_str,
-                    "age": computed_age,
-                    "gender": gender,
-                    "status": membership_status,
-                    "church": church,
-                    "parentName": parent_name,
-                    "fbProfile": fb_profile,
-                    "contactNumber": formatted_contact,
-                    "address": address,
-                    "registrationDate": current_now,
-                    "imageBase64": image_base64,
-                    "imageName": image_name,
-                }
-
-                try:
-                    script_url = st.secrets["SCRIPT_URL"]
-                    req = urllib.request.Request(
-                        script_url,
-                        data=json.dumps(payload).encode("utf-8"),
-                        headers={"Content-Type": "application/json"},
-                    )
-                    urllib.request.urlopen(req)
-                    st.success(
-                        f"Successfully registered {full_name} directly to the Cloud"
-                        " database!"
-                    )
-                except Exception as e:
+                if full_name.strip() == "":
+                    st.error("Please enter your **Full Name**.")
+                elif not gender:
+                    st.error("Please select your **Gender**.")
+                elif not membership_status:
+                    st.error("Please select your **Membership Status**.")
+                elif not church:
+                    st.error("Please select your **Church**.")
+                elif parent_name.strip() == "":
+                    st.error("Please enter your **Parent's / Guardian's Name**.")
+                elif fb_profile.strip() == "":
+                    st.error("Please enter your **Facebook Profile Link or Name**.")
+                elif not clean_contact.startswith("09") or len(clean_contact) != 11:
                     st.error(
-                        "Details verified locally, but the online database link is pending"
-                        " setup."
+                        "Please enter a valid **Contact Number**"
                     )
+                elif address.strip() == "":
+                    st.error("Please enter your **Complete Address**.")
+                else:
+                    today = date.today()
+                    computed_age = (
+                        today.year
+                        - birthday.year
+                        - ((today.month, today.day) < (birthday.month, birthday.day))
+                    )
+
+                    bday_str = birthday.strftime("%m/%d/%Y") if birthday else ""
+                    current_now = datetime.now().strftime("%m/%d/%Y %H:%M:%S")
+
+                    formatted_contact = (
+                        f"'{clean_contact[:4]}-{clean_contact[4:7]}-{clean_contact[7:]}"
+                    )
+
+                    image_base64 = ""
+                    image_name = ""
+                    if profile_image is not None:
+                        image_base64 = base64.b64encode(profile_image.read()).decode("utf-8")
+                        image_name = profile_image.name
+
+                    payload = {
+                        "action": "register",
+                        "fullName": full_name,
+                        "birthday": bday_str,
+                        "age": computed_age,
+                        "gender": gender,
+                        "status": membership_status,
+                        "church": church,
+                        "parentName": parent_name,
+                        "fbProfile": fb_profile,
+                        "contactNumber": formatted_contact,
+                        "address": address,
+                        "registrationDate": current_now,
+                        "imageBase64": image_base64,
+                        "imageName": image_name,
+                    }
+
+                    try:
+                        script_url = st.secrets["SCRIPT_URL"]
+                        req = urllib.request.Request(
+                            script_url,
+                            data=json.dumps(payload).encode("utf-8"),
+                            headers={"Content-Type": "application/json"},
+                        )
+                        urllib.request.urlopen(req)
+                        st.success(
+                            f"Successfully registered {full_name} directly to the Cloud database!"
+                        )
+                    except Exception as e:
+                        st.error(
+                            "Details verified locally, but the online database link is pending setup."
+                        )
 
 with tab_attendance:
     st.subheader("Attendance Check-In")
@@ -214,52 +212,49 @@ with tab_attendance:
                 index=None,
                 placeholder="Select Church",
             )
-            att_date = st.date_input("Attendance Date:", value=date.today())
+            att_date = st.date_input("Attendance Date:", value=date.today(), format="MM/DD/YYYY")
 
-        submit_attendance = st.form_submit_button("Check-In")
+            submit_attendance = st.form_submit_button("Check-In")
 
-        if submit_attendance:
-            if att_name.strip() == "":
-                st.error("Please enter your **Full Name**.")
-            elif not att_church:
-                st.error("Please select your **Church**.")
-            else:
-                att_date_str = att_date.strftime("%m/%d/%Y")
-                current_time_str = datetime.now().strftime("%H:%M:%S")
-                attendance_value = f"{att_date_str} {current_time_str}"
+            if submit_attendance:
+                if att_name.strip() == "":
+                    st.error("Please enter your **Full Name**.")
+                elif not att_church:
+                    st.error("Please select your **Church**.")
+                else:
+                    att_date_str = att_date.strftime("%m/%d/%Y")
+                    current_time_str = datetime.now().strftime("%H:%M:%S")
+                    attendance_value = f"{att_date_str} {current_time_str}"
 
-                payload = {
-                    "action": "attendance",
-                    "fullName": att_name,
-                    "church": att_church,
-                    "attendanceDate": attendance_value,
-                }
+                    payload = {
+                        "action": "attendance",
+                        "fullName": att_name,
+                        "church": att_church,
+                        "attendanceDate": attendance_value,
+                    }
 
-                try:
-                    script_url = st.secrets["SCRIPT_URL"]
-                    req = urllib.request.Request(
-                        script_url,
-                        data=json.dumps(payload).encode("utf-8"),
-                        headers={"Content-Type": "application/json"},
-                    )
-                    response = urllib.request.urlopen(req)
-                    res_data = json.loads(response.read().decode("utf-8"))
-
-                    if res_data.get("status") == "duplicate":
-                        st.warning(
-                            f"⚠ **{att_name}** has already checked in for"
-                            f" **{att_date_str}**!"
+                    try:
+                        script_url = st.secrets["SCRIPT_URL"]
+                        req = urllib.request.Request(
+                            script_url,
+                            data=json.dumps(payload).encode("utf-8"),
+                            headers={"Content-Type": "application/json"},
                         )
-                    else:
-                        st.success(
-                            f"✅ Attendance recorded for **{att_name}** from **{att_church}** at"
-                            f" **{attendance_value}**!"
+                        response = urllib.request.urlopen(req)
+                        res_data = json.loads(response.read().decode("utf-8"))
+
+                        if res_data.get("status") == "duplicate":
+                            st.warning(
+                                f"⚠ **{att_name}** has already checked in for **{att_date_str}**!"
+                            )
+                        else:
+                            st.success(
+                                f"✅ Attendance recorded for **{att_name}** from **{att_church}** at **{attendance_value}**!"
+                            )
+                    except Exception as e:
+                        st.error(
+                            "Details verified locally, but the online database link is pending setup."
                         )
-                except Exception as e:
-                    st.error(
-                        "Details verified locally, but the online database link is pending"
-                        " setup."
-                    )
 st.write("---")
 
 # Admin Panel
