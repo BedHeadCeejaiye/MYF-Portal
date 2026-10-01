@@ -304,7 +304,7 @@ if admin_password:
                     column_configs["Profile Picture"] = st.column_config.ImageColumn(
                         "Profile Picture",
                         help="Member profile photo",
-                        width="medium"  # Updated to medium size
+                        width="small"
                     )
 
                 st.dataframe(
