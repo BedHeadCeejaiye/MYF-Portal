@@ -313,6 +313,35 @@ if admin_password:
                     column_config=column_configs
                 )
 
+                st.write("---")
+                st.subheader("👤 Member Profile View")
+
+                member_names = df_clean["Full Name"].tolist() if "Full Name" in df_clean.columns else []
+                if member_names:
+                    selected_member_name = st.selectbox("Select a member to view full profile & photo:", member_names)
+                    selected_row = df_clean[df_clean["Full Name"] == selected_member_name]
+                    
+                    if not selected_row.empty:
+                        row_data = selected_row.iloc[0]
+                        col_img, col_info = st.columns([1, 2])
+                        
+                        with col_img:
+                            img_url = row_data.get("Profile Picture", None)
+                            if pd.notna(img_url) and str(img_url).startswith("http"):
+                                st.image(img_url, caption=f"{selected_member_name}'s Photo", width=220)
+                            else:
+                                st.info("No profile picture uploaded.")
+                                
+                        with col_info:
+                            st.write(f"**Full Name:** {row_data.get('Full Name', 'N/A')}")
+                            st.write(f"**Church:** {row_data.get('Church', 'N/A')}")
+                            st.write(f"**Status:** {row_data.get('Membership Status', 'N/A')}")
+                            st.write(f"**Contact Number:** {row_data.get('Contact Number', 'N/A')}")
+                            st.write(f"**Address:** {row_data.get('Address', 'N/A')}")
+                            st.write(f"**Facebook:** {row_data.get('Facebook Profile', 'N/A')}")
+                # ----------------------------------------------------
+
+                st.write("---")
                 csv_data = df_clean.to_csv(index=False).encode("utf-8")
                 st.download_button(
                     label="Download List as Excel/CSV file",
