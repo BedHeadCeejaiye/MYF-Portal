@@ -266,7 +266,7 @@ if admin_password:
         admin_tab1, admin_tab2 = st.tabs(["Database Records", "Attendance Logs"])
 
         with admin_tab1:
-            st.subheader("Saved Members List")
+            st.subheader("Saved Members Directory")
             try:
                 raw_url = st.secrets["connections"]["gsheets"]["spreadsheet"]
                 csv_url = get_clean_url(raw_url)
@@ -286,65 +286,61 @@ if admin_password:
                 if "Row No." not in df_clean.columns:
                     df_clean.insert(0, "Row No.", range(1, 1 + len(df_clean)))
 
-                col_s1, _ = st.columns([1, 2])
-                with col_s1:
-                    search_query = st.text_input(
-                        "Search list by name:", value=""
-                    )
+                st.markdown("### 👤 Member Profile Inspector")
+                member_names = df_clean["Full Name"].tolist() if "Full Name" in df_clean.columns else []
+                
+                if member_names:
+                    selected_member_name = st.selectbox("Select a member to view complete profile details and photo:", member_names)
+                    selected_row = df_clean[df_clean["Full Name"] == selected_member_name]
+                    
+                    if not selected_row.empty:
+                        row_data = selected_row.iloc[0]
+                        
+                        st.write("")
+                        col_img, col_info = st.columns([1, 2.5], gap="medium")
+                        
+                        with col_img:
+                            img_url = row_data.get("Profile Picture", None)
+                            if pd.notna(img_url) and str(img_url).startswith("http"):
+                                st.image(img_url, caption=f"{selected_member_name}", width=260)
+                            else:
+                                st.info("No profile picture uploaded for this member.")
+                                
+                        with col_info:
+                            st.markdown(f"#### 📄 Personal Information")
+                            st.write(f"**Full Name:** {row_data.get('Full Name', 'N/A')}")
+                            st.write(f"**Birthday:** {row_data.get('Birthday', 'N/A')} | **Age:** {row_data.get('Age', 'N/A')} | **Gender:** {row_data.get('Gender', 'N/A')}")
+                            st.write(f"**Membership Status:** {row_data.get('Membership Status', 'N/A')}")
+                            st.write(f"**Church:** {row_data.get('Church', 'N/A')}")
+                            
+                            st.markdown(f"#### 📞 Contact & Family")
+                            st.write(f"**Parent / Guardian:** {row_data.get('Parent/Guardian Name', 'N/A')}")
+                            st.write(f"**Contact Number:** {row_data.get('Contact Number', 'N/A')}")
+                            st.write(f"**Facebook Profile:** {row_data.get('Facebook Profile', 'N/A')}")
+                            st.write(f"**Address:** {row_data.get('Address', 'N/A')}")
+                            st.write(f"**Registration Date:** {row_data.get('Registration Date', 'N/A')}")
 
-                if search_query and "Full Name" in df_clean.columns:
-                    df_clean = df_clean[
-                        df_clean["Full Name"]
-                        .astype(str)
-                        .str.contains(search_query, case=False, na=False)
-                    ]
-
+                st.write("---")
+                st.subheader("📋 Full Database Table Summary")
+                
                 column_configs = {}
                 if "Profile Picture" in df_clean.columns:
                     column_configs["Profile Picture"] = st.column_config.ImageColumn(
                         "Profile Picture",
-                        help="Member profile photo",
+                        help="Member thumbnail",
                         width="small"
                     )
 
                 st.dataframe(
                     df_clean,
-                    use_container_width=False,
+                    use_container_width=True,
                     column_config=column_configs
                 )
 
                 st.write("---")
-                st.subheader("👤 Member Profile View")
-
-                member_names = df_clean["Full Name"].tolist() if "Full Name" in df_clean.columns else []
-                if member_names:
-                    selected_member_name = st.selectbox("Select a member to view full profile & photo:", member_names)
-                    selected_row = df_clean[df_clean["Full Name"] == selected_member_name]
-                    
-                    if not selected_row.empty:
-                        row_data = selected_row.iloc[0]
-                        col_img, col_info = st.columns([1, 2])
-                        
-                        with col_img:
-                            img_url = row_data.get("Profile Picture", None)
-                            if pd.notna(img_url) and str(img_url).startswith("http"):
-                                st.image(img_url, caption=f"{selected_member_name}'s Photo", width=220)
-                            else:
-                                st.info("No profile picture uploaded.")
-                                
-                        with col_info:
-                            st.write(f"**Full Name:** {row_data.get('Full Name', 'N/A')}")
-                            st.write(f"**Church:** {row_data.get('Church', 'N/A')}")
-                            st.write(f"**Status:** {row_data.get('Membership Status', 'N/A')}")
-                            st.write(f"**Contact Number:** {row_data.get('Contact Number', 'N/A')}")
-                            st.write(f"**Address:** {row_data.get('Address', 'N/A')}")
-                            st.write(f"**Facebook:** {row_data.get('Facebook Profile', 'N/A')}")
-                # ----------------------------------------------------
-
-                st.write("---")
                 csv_data = df_clean.to_csv(index=False).encode("utf-8")
                 st.download_button(
-                    label="Download List as Excel/CSV file",
+                    label="Download Full List as Excel/CSV file",
                     data=csv_data,
                     file_name=f"registered_members_{date.today().strftime('%m_%d_%Y')}.csv",
                     mime="text/csv",
