@@ -235,7 +235,7 @@ with tab_attendance:
 
                     if res_data.get("status") == "duplicate":
                         st.warning(
-                            f"⚠️ **{att_name}** has already checked in for"
+                            f"⚠️️ **{att_name}** has already checked in for"
                             f" **{att_date_str}**!"
                         )
                     else:
@@ -286,40 +286,45 @@ if admin_password:
                 if "Row No." not in df_clean.columns:
                     df_clean.insert(0, "Row No.", range(1, 1 + len(df_clean)))
 
-
-                st.markdown("Profile")
+                st.markdown("Member Profile")
                 member_names = df_clean["Full Name"].tolist() if "Full Name" in df_clean.columns else []
                 
                 if member_names:
                     col_sel, _ = st.columns([1, 2])
                     with col_sel:
-                        selected_member_name = st.selectbox("Select a member:", member_names)
+                        selected_member_name = st.selectbox(
+                            "Search member name:",
+                            member_names,
+                            index=None,
+                            placeholder="Type or select a member..."
+                        )
                         
-                    selected_row = df_clean[df_clean["Full Name"] == selected_member_name]
-                    
-                    if not selected_row.empty:
-                        row_data = selected_row.iloc[0]
+                    if selected_member_name:
+                        selected_row = df_clean[df_clean["Full Name"] == selected_member_name]
                         
-                        st.write("")
-                        col_img, col_info = st.columns([1, 2], gap="small")
-                        
-                        with col_img:
-                            img_url = row_data.get("Profile Picture", None)
-                            if pd.notna(img_url) and str(img_url).startswith("http"):
-                                st.image(img_url, caption=f"{selected_member_name}", width=340)
-                            else:
-                                st.info("No profile picture uploaded.")
-                                
-                        with col_info:
-                            st.markdown(f"### {row_data.get('Full Name', 'N/A')}")
-                            st.write(f"**Status:** {row_data.get('Membership Status', 'N/A')}  |  **Church:** {row_data.get('Church', 'N/A')}")
-                            st.write(f"**Birthday:** {row_data.get('Birthday', 'N/A')} ({row_data.get('Age', 'N/A')} yrs)  |  **Gender:** {row_data.get('Gender', 'N/A')}")
-                            st.write(f"**Contact:** {row_data.get('Contact Number', 'N/A')}  |  **Guardian:** {row_data.get('Parent/Guardian Name', 'N/A')}")
-                            st.write(f"**Address:** {row_data.get('Address', 'N/A')}")
-                            st.write(f"**FB:** {row_data.get('Facebook Profile', 'N/A')}  |  **Registered:** {row_data.get('Registration Date', 'N/A')}")
+                        if not selected_row.empty:
+                            row_data = selected_row.iloc[0]
+                            
+                            st.write("")
+                            col_img, col_info = st.columns([1, 2], gap="small")
+                            
+                            with col_img:
+                                img_url = row_data.get("Profile Picture", None)
+                                if pd.notna(img_url) and str(img_url).startswith("http"):
+                                    st.image(img_url, caption=f"{selected_member_name}", width=340)
+                                else:
+                                    st.info("No profile picture uploaded.")
+                                    
+                            with col_info:
+                                st.markdown(f"### {row_data.get('Full Name', 'N/A')}")
+                                st.write(f"**Status:** {row_data.get('Membership Status', 'N/A')}  |  **Church:** {row_data.get('Church', 'N/A')}")
+                                st.write(f"**Birthday:** {row_data.get('Birthday', 'N/A')} ({row_data.get('Age', 'N/A')} yrs)  |  **Gender:** {row_data.get('Gender', 'N/A')}")
+                                st.write(f"**Contact:** {row_data.get('Contact Number', 'N/A')}  |  **Guardian:** {row_data.get('Parent/Guardian Name', 'N/A')}")
+                                st.write(f"**Address:** {row_data.get('Address', 'N/A')}")
+                                st.write(f"**FB:** {row_data.get('Facebook Profile', 'N/A')}  |  **Registered:** {row_data.get('Registration Date', 'N/A')}")
 
                 st.write("---")
-                st.subheader("Members list")
+                st.subheader("📋 Full Database Table Summary")
                 
                 column_configs = {}
                 if "Profile Picture" in df_clean.columns:
