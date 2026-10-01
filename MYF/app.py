@@ -12,6 +12,18 @@ def get_clean_url(url_string):
     if "/edit" in url_string:
         return url_string.split("/edit")[0] + "/export?format=csv"
     return url_string
+
+# Shared Church List
+CHURCHES_LIST = [
+    "Taytay Methodist Church",
+    "Upper Javier Methodist Mission",
+    "Baras Mission Methodist Church",
+    "Halayhayin Peace Methodist Church",
+    "Tanay Methodist Mission",
+    "Higher Ground Methodist Church",
+    "River of Life Methodist Church",
+    "O Mira Gratia Evangelical Brethren Church",
+]
     
 # Daily Bible Verse Setup
 verses_list = [
@@ -82,16 +94,7 @@ with tab_register:
                 )
                 church = st.selectbox(
                     "Church:",
-                    [
-                        "Taytay Methodist Church",
-                        "Upper Javier Methodist Mission",
-                        "Baras Mission Methodist Church",
-                        "Halayhayin Peace Methodist Church",
-                        "Tanay Methodist Mission",
-                        "Higher Ground Methodist Church",
-                        "River of Life Methodist Church",
-                        "O Mira Gratia Evangelical Brethren Church",
-                    ],
+                    CHURCHES_LIST,
                     index=None,
                     placeholder="Select Church",
                 )
@@ -205,6 +208,12 @@ with tab_attendance:
         col_att, _ = st.columns([1, 2])
         with col_att:
             att_name = st.text_input("Full Name:", placeholder="e.g., John Doe")
+            att_church = st.selectbox(
+                "Church:",
+                CHURCHES_LIST,
+                index=None,
+                placeholder="Select Church",
+            )
             att_date = st.date_input("Attendance Date:", value=date.today())
 
         submit_attendance = st.form_submit_button("Check-In")
@@ -212,6 +221,8 @@ with tab_attendance:
         if submit_attendance:
             if att_name.strip() == "":
                 st.error("Please enter your **Full Name**.")
+            elif not att_church:
+                st.error("Please select your **Church**.")
             else:
                 att_date_str = att_date.strftime("%m/%d/%Y")
                 current_time_str = datetime.now().strftime("%H:%M:%S")
@@ -220,6 +231,7 @@ with tab_attendance:
                 payload = {
                     "action": "attendance",
                     "fullName": att_name,
+                    "church": att_church,
                     "attendanceDate": attendance_value,
                 }
 
@@ -235,12 +247,12 @@ with tab_attendance:
 
                     if res_data.get("status") == "duplicate":
                         st.warning(
-                            f"⚠️️ **{att_name}** has already checked in for"
+                            f"⚠ **{att_name}** has already checked in for"
                             f" **{att_date_str}**!"
                         )
                     else:
                         st.success(
-                            f"✅ Attendance recorded for **{att_name}** at"
+                            f"✅ Attendance recorded for **{att_name}** from **{att_church}** at"
                             f" **{attendance_value}**!"
                         )
                 except Exception as e:
@@ -323,19 +335,10 @@ if admin_password:
 
                 st.write("---")
                 st.subheader("Master List")
-                
-                column_configs = {}
-                if "Profile Picture" in df_clean.columns:
-                    column_configs["Profile Picture"] = st.column_config.ImageColumn(
-                        "Profile Picture",
-                        help="Member thumbnail",
-                        width="small"
-                    )
 
                 st.dataframe(
                     df_clean,
-                    use_container_width=True,
-                    column_config=column_configs
+                    use_container_width=True
                 )
 
                 st.write("---")
@@ -365,11 +368,11 @@ if admin_password:
             if not df_att.empty:
                 if "Row No." not in df_att.columns:
                     df_att.insert(0, "Row No.", range(1, 1 + len(df_att)))
-
+                    
                 new_columns = []
                 date_count = 0
                 for col in df_att.columns:
-                    if col in ["Row No.", "Full name", "Full Name"]:
+                    if col in ["Row No.", "Full name", "Full Name", "Church", "church"]:
                         new_columns.append(col)
                     else:
                         if date_count == 0:
